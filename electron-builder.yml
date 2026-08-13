@@ -1,0 +1,12 @@
+appId: com.organizadorchamados.app
+productName: Organizador de Chamados
+directories:
+  output: release
+files:
+  - dist/**/*
+  - dist-electron/**/*
+win:
+  target: nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
