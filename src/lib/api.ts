@@ -32,3 +32,23 @@ export function formatMesLabel(mes: string): string {
 export function visitaLabel(ref: VisitaRef): string {
   return `${ref.dia}/${ref.mes} — ${ref.tipoVisita}`;
 }
+
+/** Sugestão de sigla pra pasta a partir do nome do tipo de visita (ex: "Troca de Bomba" -> "TROCADEBOMBA"). */
+export function suggestSigla(label: string): string {
+  const normalized = label
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase();
+  return normalized.slice(0, 14);
+}
+
+/** URL pro protocolo customizado "media://" que exibe previews de arquivos locais. */
+export function toMediaUrl(filePath: string): string {
+  const encoded = filePath
+    .replace(/\\/g, "/")
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+  return `media:///${encoded}`;
+}

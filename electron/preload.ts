@@ -9,25 +9,26 @@ contextBridge.exposeInMainWorld("app", {
   empresas: {
     list: () => ipcRenderer.invoke("empresas:list"),
     create: (nome: string) => ipcRenderer.invoke("empresas:create", nome),
+    delete: (nome: string) => ipcRenderer.invoke("empresas:delete", nome),
   },
   visitas: {
     listMeses: (empresa: string) => ipcRenderer.invoke("visitas:listMeses", empresa),
-    listDias: (empresa: string, mes: string) => ipcRenderer.invoke("visitas:listDias", empresa, mes),
-    listTipos: (empresa: string, mes: string, dia: string) =>
-      ipcRenderer.invoke("visitas:listTipos", empresa, mes, dia),
+    listVisitas: (empresa: string, mes: string) => ipcRenderer.invoke("visitas:listVisitas", empresa, mes),
     create: (ref: unknown) => ipcRenderer.invoke("visitas:create", ref),
+    delete: (ref: unknown) => ipcRenderer.invoke("visitas:delete", ref),
   },
   arquivos: {
-    list: (ref: unknown, categoria: string) => ipcRenderer.invoke("arquivos:list", ref, categoria),
-    pickFiles: (categoria: string) => ipcRenderer.invoke("arquivos:pickFiles", categoria),
-    add: (ref: unknown, categoria: string, sourcePaths: string[]) =>
-      ipcRenderer.invoke("arquivos:add", ref, categoria, sourcePaths),
-    remove: (ref: unknown, categoria: string, fileName: string) =>
-      ipcRenderer.invoke("arquivos:remove", ref, categoria, fileName),
+    list: (ref: unknown) => ipcRenderer.invoke("arquivos:list", ref),
+    pickFiles: () => ipcRenderer.invoke("arquivos:pickFiles"),
+    add: (ref: unknown, sourcePaths: string[]) => ipcRenderer.invoke("arquivos:add", ref, sourcePaths),
+    remove: (ref: unknown, fileName: string) => ipcRenderer.invoke("arquivos:remove", ref, fileName),
     openInExplorer: (ref: unknown) => ipcRenderer.invoke("arquivos:openInExplorer", ref),
+    openFile: (filePath: string) => ipcRenderer.invoke("arquivos:openFile", filePath),
+    showInFolder: (filePath: string) => ipcRenderer.invoke("arquivos:showInFolder", filePath),
   },
   laudo: {
     get: (ref: unknown) => ipcRenderer.invoke("laudo:get", ref),
+    save: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:save", ref, data),
     generate: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:generate", ref, data),
   },
 });

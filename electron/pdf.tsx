@@ -1,9 +1,8 @@
 import { ipcMain } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
-import React from "react";
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
-import { ensureRootFolder, visitaPath } from "./fs-ops";
+import { ensureContext, visitaPath } from "./fs-ops";
 
 interface VisitaRef {
   empresa: string;
@@ -16,13 +15,11 @@ interface LaudoData {
   empresa: string;
   data: string;
   tipoVisita: string;
-  equipamento: string;
-  problemaRelatado: string;
-  diagnostico: string;
-  servicoExecutado: string;
-  pecasTrocadas: string;
-  observacoes: string;
-  tecnicoResponsavel: string;
+  numeroSerie: string;
+  laudoTecnico: string;
+  pecasSolicitadas: string;
+  materialEstoque: string;
+  acompanhante: string;
   geradoEm: string;
 }
 
@@ -33,8 +30,6 @@ const styles = StyleSheet.create({
   section: { marginBottom: 14 },
   label: { fontSize: 9, color: "#777777", marginBottom: 2, textTransform: "uppercase" },
   value: { fontSize: 11, marginBottom: 2 },
-  row: { flexDirection: "row", marginBottom: 14, gap: 24 },
-  col: { flex: 1 },
   footer: { position: "absolute", bottom: 30, left: 40, right: 40, fontSize: 8, color: "#999999" },
 });
 
@@ -43,6 +38,20 @@ function Field({ label, value }: { label: string; value: string }) {
     <View style={styles.section}>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value || "-"}</Text>
+    </View>
+  );
+}
+
+function MultilineField({ label, value }: { label: string; value: string }) {
+  const lines = value ? value.split("\n") : ["-"];
+  return (
+    <View style={styles.section}>
+      <Text style={styles.label}>{label}</Text>
+      {lines.map((line, i) => (
+        <Text key={i} style={styles.value}>
+          {line || " "}
+        </Text>
+      ))}
     </View>
   );
 }
@@ -56,20 +65,11 @@ function LaudoDocument({ data }: { data: LaudoData }) {
           {data.empresa} — {data.data} — {data.tipoVisita}
         </Text>
 
-        <View style={styles.row}>
-          <View style={styles.col}>
-            <Field label="Equipamento" value={data.equipamento} />
-          </View>
-          <View style={styles.col}>
-            <Field label="Técnico Responsável" value={data.tecnicoResponsavel} />
-          </View>
-        </View>
-
-        <Field label="Problema Relatado" value={data.problemaRelatado} />
-        <Field label="Diagnóstico" value={data.diagnostico} />
-        <Field label="Serviço Executado" value={data.servicoExecutado} />
-        <Field label="Peças Trocadas" value={data.pecasTrocadas} />
-        <Field label="Observações" value={data.observacoes} />
+        <MultilineField label="Número de Série dos Equipamentos" value={data.numeroSerie} />
+        <MultilineField label="Laudo Técnico" value={data.laudoTecnico} />
+        <MultilineField label="Peças Solicitadas" value={data.pecasSolicitadas} />
+        <MultilineField label="Foi utilizado algum material do estoque técnico?" value={data.materialEstoque} />
+        <Field label="Dados de quem acompanhou a visita técnica" value={data.acompanhante} />
 
         <Text style={styles.footer}>Gerado em {data.geradoEm}</Text>
       </Page>
@@ -79,8 +79,8 @@ function LaudoDocument({ data }: { data: LaudoData }) {
 
 export function registerPdfHandlers(): void {
   ipcMain.handle("laudo:generate", async (_event, ref: VisitaRef, data: LaudoData) => {
-    const root = await ensureRootFolder();
-    const laudoDir = path.join(visitaPath(root, ref), "laudo");
+    const { root, tiposDeVisita } = await ensureContext();
+    const laudoDir = path.join(visitaPath(root, ref, tiposDeVisita), "laudo");
     await fs.mkdir(laudoDir, { recursive: true });
 
     const jsonPath = path.join(laudoDir, "laudo.json");

@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { api } from "../lib/api";
+import { api, toMediaUrl } from "../lib/api";
 import type { FileEntry, VisitaRef } from "../types";
+
+const THUMB_SIZE_KEY = "organizador-chamados:thumb-size";
+const MIN_THUMB = 80;
+const MAX_THUMB = 260;
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -8,31 +12,61 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-interface Props {
-  visitaRef: VisitaRef;
-  categoria: "fotos" | "videos";
-  label: string;
+function isVideo(mimeType: string): boolean {
+  return mimeType.startsWith("video/");
 }
 
-export function FileDropzone({ visitaRef, categoria, label }: Props) {
+function loadThumbSize(): number {
+  const stored = Number(localStorage.getItem(THUMB_SIZE_KEY));
+  return stored >= MIN_THUMB && stored <= MAX_THUMB ? stored : 140;
+}
+
+interface Props {
+  visitaRef: VisitaRef;
+}
+
+interface ContextMenuState {
+  file: FileEntry;
+  x: number;
+  y: number;
+}
+
+export function FileDropzone({ visitaRef }: Props) {
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [thumbSize, setThumbSize] = useState(loadThumbSize);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
   const refresh = useCallback(async () => {
-    const list = await api.arquivos.list(visitaRef, categoria);
+    const list = await api.arquivos.list(visitaRef);
     setFiles(list);
-  }, [visitaRef, categoria]);
+  }, [visitaRef]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    localStorage.setItem(THUMB_SIZE_KEY, String(thumbSize));
+  }, [thumbSize]);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    window.addEventListener("click", close);
+    window.addEventListener("contextmenu", close);
+    return () => {
+      window.removeEventListener("click", close);
+      window.removeEventListener("contextmenu", close);
+    };
+  }, [contextMenu]);
+
   async function addPaths(paths: string[]) {
     if (paths.length === 0) return;
     setBusy(true);
     try {
-      const updated = await api.arquivos.add(visitaRef, categoria, paths);
+      const updated = await api.arquivos.add(visitaRef, paths);
       setFiles(updated);
     } finally {
       setBusy(false);
@@ -49,12 +83,12 @@ export function FileDropzone({ visitaRef, categoria, label }: Props) {
   }
 
   async function handlePick() {
-    const paths = await api.arquivos.pickFiles(categoria);
+    const paths = await api.arquivos.pickFiles();
     addPaths(paths);
   }
 
   async function handleRemove(fileName: string) {
-    await api.arquivos.remove(visitaRef, categoria, fileName);
+    await api.arquivos.remove(visitaRef, fileName);
     refresh();
   }
 
@@ -69,35 +103,112 @@ export function FileDropzone({ visitaRef, categoria, label }: Props) {
         onDrop={handleDrop}
         onClick={handlePick}
         className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
-          isDragging ? "border-blue-500 bg-blue-50" : "border-slate-300 hover:border-slate-400"
+          isDragging
+            ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950/30"
+            : "border-slate-300 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600"
         }`}
       >
-        <p className="text-sm text-slate-600">
-          Arraste {label.toLowerCase()} aqui ou <span className="text-blue-600 underline">clique para selecionar</span>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Arraste fotos ou vídeos aqui ou <span className="text-blue-600 underline dark:text-blue-400">clique para selecionar</span>
         </p>
-        {busy && <p className="mt-1 text-xs text-slate-400">Copiando arquivos…</p>}
+        {busy && <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Copiando arquivos…</p>}
       </div>
 
       {files.length > 0 && (
-        <ul className="mt-3 divide-y divide-slate-100 rounded-lg border border-slate-200">
-          {files.map((f) => (
-            <li key={f.name} className="flex items-center justify-between px-3 py-2 text-sm">
-              <span className="truncate text-slate-700">{f.name}</span>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400">{formatSize(f.sizeBytes)}</span>
-                <button
-                  onClick={() => handleRemove(f.name)}
-                  className="text-xs text-red-500 hover:text-red-700"
-                >
-                  remover
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-4 flex items-center gap-2">
+          <label className="text-xs text-slate-500 dark:text-slate-400">Tamanho do preview</label>
+          <input
+            type="range"
+            min={MIN_THUMB}
+            max={MAX_THUMB}
+            step={10}
+            value={thumbSize}
+            onChange={(e) => setThumbSize(Number(e.target.value))}
+            className="w-40"
+          />
+        </div>
       )}
-      {files.length === 0 && (
-        <p className="mt-2 text-xs text-slate-400">Nenhum arquivo ainda.</p>
+
+      {files.length > 0 ? (
+        <div
+          className="mt-3 grid gap-3"
+          style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbSize}px, 1fr))` }}
+        >
+          {files.map((f) => (
+            <div
+              key={f.name}
+              onDoubleClick={() => api.arquivos.openFile(f.path)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setContextMenu({ file: f, x: e.clientX, y: e.clientY });
+              }}
+              title={f.name}
+              className="group relative cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"
+              style={{ aspectRatio: "1 / 1" }}
+            >
+              {isVideo(f.mimeType) ? (
+                <video src={toMediaUrl(f.path)} muted preload="metadata" className="h-full w-full object-cover" />
+              ) : (
+                <img src={toMediaUrl(f.path)} loading="lazy" className="h-full w-full object-cover" />
+              )}
+
+              {isVideo(f.mimeType) && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50">
+                    <svg viewBox="0 0 24 24" fill="white" className="ml-0.5 h-4 w-4">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                {f.name} · {formatSize(f.sizeBytes)}
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(f.name);
+                }}
+                title="Remover"
+                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Nenhum arquivo ainda.</p>
+      )}
+
+      {contextMenu && (
+        <div
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          className="fixed z-50 w-52 overflow-hidden rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-800"
+        >
+          <button
+            onClick={() => api.arquivos.openFile(contextMenu.file.path)}
+            className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            Abrir
+          </button>
+          <button
+            onClick={() => api.arquivos.showInFolder(contextMenu.file.path)}
+            className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            Ver local do arquivo
+          </button>
+          <button
+            onClick={() => handleRemove(contextMenu.file.name)}
+            className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+          >
+            Remover
+          </button>
+        </div>
       )}
     </div>
   );

@@ -1,10 +1,18 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, net, protocol } from "electron";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { registerFsHandlers } from "./fs-ops";
 import { registerPdfHandlers } from "./pdf";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+/** Protocolo customizado pra exibir previews de fotos/vídeos locais sem os bloqueios de "file://". */
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "media",
+    privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, bypassCSP: true, corsEnabled: true },
+  },
+]);
 
 process.env.APP_ROOT = path.join(__dirname, "..");
 export const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL;
@@ -54,6 +62,13 @@ app.on("activate", () => {
 });
 
 app.whenReady().then(() => {
+  protocol.handle("media", (request) => {
+    // "media:///C%3A/Users/..." tem o mesmo formato de um "file://" URL — reaproveita o parser do Node.
+    const fileUrl = "file" + request.url.slice("media".length);
+    const filePath = fileURLToPath(fileUrl);
+    return net.fetch(pathToFileURL(filePath).toString());
+  });
+
   registerFsHandlers();
   registerPdfHandlers();
   createWindow();

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "./lib/api";
+import { useTheme } from "./lib/theme";
 import { Home } from "./pages/Home";
 import { Empresa } from "./pages/Empresa";
 import { Visita } from "./pages/Visita";
@@ -8,13 +9,35 @@ import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
   | { name: "home" }
-  | { name: "empresa"; empresa: string }
+  | { name: "empresa"; empresa: string; autoAbrirForm?: boolean }
   | { name: "visita"; ref: VisitaRef }
   | { name: "settings" };
+
+function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      title={theme === "dark" ? "Mudar para modo claro" : "Mudar para modo escuro"}
+      className="fixed bottom-4 right-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+    >
+      {theme === "dark" ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+        </svg>
+      )}
+    </button>
+  );
+}
 
 export default function App() {
   const [route, setRoute] = useState<Route>({ name: "home" });
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const { theme, toggle } = useTheme();
 
   useEffect(() => {
     if (!api) return;
@@ -23,8 +46,8 @@ export default function App() {
 
   if (!api) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white p-8 text-center">
-        <p className="max-w-md text-sm text-slate-500">
+      <div className="flex h-screen items-center justify-center bg-white p-8 text-center dark:bg-slate-950">
+        <p className="max-w-md text-sm text-slate-500 dark:text-slate-400">
           Este aplicativo precisa ser aberto pela janela do Electron (não funciona direto num
           navegador comum), pois depende de acesso ao sistema de arquivos do seu PC.
         </p>
@@ -32,14 +55,16 @@ export default function App() {
     );
   }
 
-  const tiposDeVisita = settings?.tiposDeVisita ?? [];
-  const tecnicoPadrao = settings?.tecnicoNome ?? "";
+  const tiposDeVisita = (settings?.tiposDeVisita ?? []).map((t) => t.label);
+  const acompanhantePadrao = [settings?.tecnicoNome, settings?.tecnicoEmpresa].filter(Boolean).join(" - ");
 
   return (
-    <div className="h-screen bg-white">
+    <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
+      <ThemeToggle theme={theme} onToggle={toggle} />
+
       {route.name === "home" && (
         <Home
-          onOpenEmpresa={(empresa) => setRoute({ name: "empresa", empresa })}
+          onOpenEmpresa={(empresa, autoAbrirForm) => setRoute({ name: "empresa", empresa, autoAbrirForm })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />
       )}
@@ -48,6 +73,7 @@ export default function App() {
         <Empresa
           empresa={route.empresa}
           tiposDeVisita={tiposDeVisita}
+          autoAbrirForm={route.autoAbrirForm}
           onBack={() => setRoute({ name: "home" })}
           onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
         />
@@ -56,7 +82,7 @@ export default function App() {
       {route.name === "visita" && (
         <Visita
           visitaRef={route.ref}
-          tecnicoPadrao={tecnicoPadrao}
+          acompanhantePadrao={acompanhantePadrao}
           onBack={() => setRoute({ name: "empresa", empresa: route.ref.empresa })}
         />
       )}

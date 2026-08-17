@@ -4,23 +4,21 @@ import type { LaudoData, VisitaRef } from "../types";
 
 interface Props {
   visitaRef: VisitaRef;
-  tecnicoPadrao: string;
+  acompanhantePadrao: string;
 }
 
 const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
-  equipamento: "",
-  problemaRelatado: "",
-  diagnostico: "",
-  servicoExecutado: "",
-  pecasTrocadas: "",
-  observacoes: "",
-  tecnicoResponsavel: "",
+  numeroSerie: "",
+  laudoTecnico: "",
+  pecasSolicitadas: "",
+  materialEstoque: "",
+  acompanhante: "",
 };
 
-export function LaudoForm({ visitaRef, tecnicoPadrao }: Props) {
+export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingAction, setSavingAction] = useState<"save" | "generate" | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,31 +28,29 @@ export function LaudoForm({ visitaRef, tecnicoPadrao }: Props) {
       if (cancelled) return;
       if (existing) {
         setForm({
-          equipamento: existing.equipamento,
-          problemaRelatado: existing.problemaRelatado,
-          diagnostico: existing.diagnostico,
-          servicoExecutado: existing.servicoExecutado,
-          pecasTrocadas: existing.pecasTrocadas,
-          observacoes: existing.observacoes,
-          tecnicoResponsavel: existing.tecnicoResponsavel,
+          numeroSerie: existing.numeroSerie ?? "",
+          laudoTecnico: existing.laudoTecnico ?? "",
+          pecasSolicitadas: existing.pecasSolicitadas ?? "",
+          materialEstoque: existing.materialEstoque ?? "",
+          acompanhante: existing.acompanhante ?? "",
         });
       } else {
-        setForm({ ...EMPTY, tecnicoResponsavel: tecnicoPadrao });
+        setForm({ ...EMPTY, acompanhante: acompanhantePadrao });
       }
       setLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, [visitaRef, tecnicoPadrao]);
+  }, [visitaRef, acompanhantePadrao]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setSavedMessage(null);
   }
 
-  async function handleGenerate() {
-    setSaving(true);
+  async function persist(generatePdf: boolean) {
+    setSavingAction(generatePdf ? "generate" : "save");
     setSavedMessage(null);
     try {
       const data: LaudoData = {
@@ -64,44 +60,48 @@ export function LaudoForm({ visitaRef, tecnicoPadrao }: Props) {
         tipoVisita: visitaRef.tipoVisita,
         geradoEm: new Date().toLocaleString("pt-BR"),
       };
-      await api.laudo.generate(visitaRef, data);
-      setSavedMessage("Laudo gerado com sucesso.");
+      if (generatePdf) {
+        await api.laudo.generate(visitaRef, data);
+        setSavedMessage("PDF gerado com sucesso.");
+      } else {
+        await api.laudo.save(visitaRef, data);
+        setSavedMessage("Rascunho salvo.");
+      }
     } finally {
-      setSaving(false);
+      setSavingAction(null);
     }
   }
 
   if (loading) {
-    return <p className="text-sm text-slate-400">Carregando laudo…</p>;
+    return <p className="text-sm text-slate-400 dark:text-slate-500">Carregando laudo…</p>;
   }
 
-  const fields: { key: keyof typeof form; label: string; multiline?: boolean }[] = [
-    { key: "equipamento", label: "Equipamento" },
-    { key: "tecnicoResponsavel", label: "Técnico Responsável" },
-    { key: "problemaRelatado", label: "Problema Relatado", multiline: true },
-    { key: "diagnostico", label: "Diagnóstico", multiline: true },
-    { key: "servicoExecutado", label: "Serviço Executado", multiline: true },
-    { key: "pecasTrocadas", label: "Peças Trocadas" },
-    { key: "observacoes", label: "Observações", multiline: true },
+  const fields: { key: keyof typeof form; label: string; multiline?: boolean; rows?: number; placeholder?: string }[] = [
+    { key: "numeroSerie", label: "Número de Série dos Equipamentos", multiline: true, rows: 6 },
+    { key: "laudoTecnico", label: "Laudo Técnico", multiline: true, rows: 6 },
+    { key: "pecasSolicitadas", label: "Peças Solicitadas", multiline: true, rows: 3 },
+    { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?", multiline: true, rows: 3 },
+    { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica" },
   ];
 
   return (
     <div className="space-y-4">
       {fields.map((f) => (
         <div key={f.key}>
-          <label className="mb-1 block text-xs font-medium uppercase text-slate-500">{f.label}</label>
+          <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{f.label}</label>
           {f.multiline ? (
             <textarea
               value={form[f.key]}
               onChange={(e) => update(f.key, e.target.value)}
-              rows={3}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              rows={f.rows ?? 3}
+              placeholder={f.placeholder}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
             />
           ) : (
             <input
               value={form[f.key]}
               onChange={(e) => update(f.key, e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           )}
         </div>
@@ -109,13 +109,20 @@ export function LaudoForm({ visitaRef, tecnicoPadrao }: Props) {
 
       <div className="flex items-center gap-3 pt-2">
         <button
-          onClick={handleGenerate}
-          disabled={saving}
+          onClick={() => persist(false)}
+          disabled={savingAction !== null}
+          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          {savingAction === "save" ? "Salvando…" : "Salvar"}
+        </button>
+        <button
+          onClick={() => persist(true)}
+          disabled={savingAction !== null}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? "Gerando…" : "Gerar PDF"}
+          {savingAction === "generate" ? "Gerando…" : "Gerar PDF"}
         </button>
-        {savedMessage && <span className="text-sm text-green-600">{savedMessage}</span>}
+        {savedMessage && <span className="text-sm text-green-600 dark:text-green-400">{savedMessage}</span>}
       </div>
     </div>
   );

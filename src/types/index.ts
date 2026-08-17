@@ -1,6 +1,12 @@
+export interface TipoVisitaConfig {
+  label: string;
+  /** Sigla usada no nome da pasta no Windows, ex: "CORRETIVA" */
+  sigla: string;
+}
+
 export interface AppSettings {
   rootFolder: string | null;
-  tiposDeVisita: string[];
+  tiposDeVisita: TipoVisitaConfig[];
   tecnicoNome: string;
   tecnicoEmpresa: string;
 }
@@ -18,13 +24,11 @@ export interface LaudoData {
   empresa: string;
   data: string;
   tipoVisita: string;
-  equipamento: string;
-  problemaRelatado: string;
-  diagnostico: string;
-  servicoExecutado: string;
-  pecasTrocadas: string;
-  observacoes: string;
-  tecnicoResponsavel: string;
+  numeroSerie: string;
+  laudoTecnico: string;
+  pecasSolicitadas: string;
+  materialEstoque: string;
+  acompanhante: string;
   geradoEm: string;
 }
 
@@ -44,22 +48,26 @@ export interface AppApi {
   empresas: {
     list(): Promise<string[]>;
     create(nome: string): Promise<void>;
+    delete(nome: string): Promise<boolean>;
   };
   visitas: {
     listMeses(empresa: string): Promise<string[]>;
-    listDias(empresa: string, mes: string): Promise<string[]>;
-    listTipos(empresa: string, mes: string, dia: string): Promise<string[]>;
+    listVisitas(empresa: string, mes: string): Promise<{ dia: string; tipoVisita: string }[]>;
     create(ref: VisitaRef): Promise<void>;
+    delete(ref: VisitaRef): Promise<boolean>;
   };
   arquivos: {
-    list(ref: VisitaRef, categoria: "fotos" | "videos"): Promise<FileEntry[]>;
-    pickFiles(categoria: "fotos" | "videos"): Promise<string[]>;
-    add(ref: VisitaRef, categoria: "fotos" | "videos", sourcePaths: string[]): Promise<FileEntry[]>;
-    remove(ref: VisitaRef, categoria: "fotos" | "videos", fileName: string): Promise<void>;
+    list(ref: VisitaRef): Promise<FileEntry[]>;
+    pickFiles(): Promise<string[]>;
+    add(ref: VisitaRef, sourcePaths: string[]): Promise<FileEntry[]>;
+    remove(ref: VisitaRef, fileName: string): Promise<void>;
     openInExplorer(ref: VisitaRef): Promise<void>;
+    openFile(filePath: string): Promise<void>;
+    showInFolder(filePath: string): Promise<void>;
   };
   laudo: {
     get(ref: VisitaRef): Promise<LaudoData | null>;
+    save(ref: VisitaRef, data: LaudoData): Promise<void>;
     generate(ref: VisitaRef, data: LaudoData): Promise<string>;
   };
 }

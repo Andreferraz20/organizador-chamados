@@ -5,18 +5,22 @@ import type { VisitaRef } from "../types";
 interface Props {
   empresa: string;
   tiposDeVisita: string[];
+  autoAbrirForm?: boolean;
   onBack: () => void;
   onOpenVisita: (ref: VisitaRef) => void;
 }
 
-export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props) {
+interface VisitaResumo {
+  dia: string;
+  tipoVisita: string;
+}
+
+export function Empresa({ empresa, tiposDeVisita, autoAbrirForm, onBack, onOpenVisita }: Props) {
   const [meses, setMeses] = useState<string[]>([]);
   const [selectedMes, setSelectedMes] = useState<string | null>(null);
-  const [dias, setDias] = useState<string[]>([]);
-  const [selectedDia, setSelectedDia] = useState<string | null>(null);
-  const [tipos, setTipos] = useState<string[]>([]);
+  const [visitas, setVisitas] = useState<VisitaResumo[]>([]);
 
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(Boolean(autoAbrirForm));
   const [novaData, setNovaData] = useState(() => {
     const { mes, dia } = todayParts();
     return `${mes}-${dia}`;
@@ -29,20 +33,11 @@ export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
   }, [empresa]);
 
   useEffect(() => {
-    setSelectedDia(null);
-    setDias([]);
-    setTipos([]);
+    setVisitas([]);
     if (selectedMes) {
-      api.visitas.listDias(empresa, selectedMes).then(setDias);
+      api.visitas.listVisitas(empresa, selectedMes).then(setVisitas);
     }
   }, [empresa, selectedMes]);
-
-  useEffect(() => {
-    setTipos([]);
-    if (selectedMes && selectedDia) {
-      api.visitas.listTipos(empresa, selectedMes, selectedDia).then(setTipos);
-    }
-  }, [empresa, selectedMes, selectedDia]);
 
   async function handleCreateVisita() {
     if (!novoTipo.trim()) return;
@@ -62,10 +57,13 @@ export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
     <div className="flex h-full flex-col p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <button onClick={onBack} className="text-sm text-slate-400 hover:text-slate-600">
+          <button
+            onClick={onBack}
+            className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
             ← Empresas
           </button>
-          <h1 className="text-xl font-semibold text-slate-800">{empresa}</h1>
+          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">{empresa}</h1>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
@@ -76,22 +74,22 @@ export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
       </div>
 
       {showForm && (
-        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Data</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Data</label>
             <input
               type="date"
               value={novaData}
               onChange={(e) => setNovaData(e.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500">Tipo de Visita</label>
+            <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Tipo de Visita</label>
             <select
               value={novoTipo}
               onChange={(e) => setNovoTipo(e.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               {tiposDeVisita.map((t) => (
                 <option key={t} value={t}>
@@ -110,7 +108,7 @@ export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
         </div>
       )}
 
-      <div className="grid flex-1 grid-cols-3 gap-4 overflow-hidden">
+      <div className="grid flex-1 grid-cols-2 gap-4 overflow-hidden">
         <Column title="Mês">
           {meses.map((mes) => (
             <ColumnItem key={mes} active={mes === selectedMes} onClick={() => setSelectedMes(mes)}>
@@ -120,29 +118,19 @@ export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
           {meses.length === 0 && <EmptyHint text="Nenhuma visita ainda" />}
         </Column>
 
-        <Column title="Dia">
+        <Column title="Visitas">
           {selectedMes &&
-            dias.map((dia) => (
-              <ColumnItem key={dia} active={dia === selectedDia} onClick={() => setSelectedDia(dia)}>
-                Dia {dia}
-              </ColumnItem>
-            ))}
-          {selectedMes && dias.length === 0 && <EmptyHint text="Nenhum dia ainda" />}
-        </Column>
-
-        <Column title="Tipo de Visita">
-          {selectedMes &&
-            selectedDia &&
-            tipos.map((tipo) => (
+            visitas.map((v) => (
               <ColumnItem
-                key={tipo}
+                key={`${v.dia}-${v.tipoVisita}`}
                 active={false}
-                onClick={() => onOpenVisita({ empresa, mes: selectedMes, dia: selectedDia, tipoVisita: tipo })}
+                onClick={() => onOpenVisita({ empresa, mes: selectedMes, dia: v.dia, tipoVisita: v.tipoVisita })}
               >
-                {tipo}
+                Dia {v.dia} — {v.tipoVisita}
               </ColumnItem>
             ))}
-          {selectedMes && selectedDia && tipos.length === 0 && <EmptyHint text="Nenhum tipo ainda" />}
+          {selectedMes && visitas.length === 0 && <EmptyHint text="Nenhuma visita ainda" />}
+          {!selectedMes && <EmptyHint text="Escolha um mês" />}
         </Column>
       </div>
     </div>
@@ -151,8 +139,8 @@ export function Empresa({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
 
 function Column({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200">
-      <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase text-slate-500">
+    <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase text-slate-500 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400">
         {title}
       </div>
       <div className="flex-1 overflow-y-auto p-2">{children}</div>
@@ -173,7 +161,9 @@ function ColumnItem({
     <button
       onClick={onClick}
       className={`mb-1 block w-full rounded-md px-3 py-2 text-left text-sm ${
-        active ? "bg-blue-100 text-blue-700" : "text-slate-700 hover:bg-slate-100"
+        active
+          ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+          : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
       }`}
     >
       {children}
@@ -182,5 +172,5 @@ function ColumnItem({
 }
 
 function EmptyHint({ text }: { text: string }) {
-  return <p className="px-3 py-2 text-xs text-slate-400">{text}</p>;
+  return <p className="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">{text}</p>;
 }
