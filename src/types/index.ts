@@ -39,6 +39,26 @@ export interface FileEntry {
   mimeType: string;
 }
 
+export interface Pessoa {
+  nome: string;
+  contato: string;
+}
+
+export interface ClienteDados {
+  nome: string;
+  endereco: string;
+  pessoas: Pessoa[];
+}
+
+export interface ProblemaDetalhe {
+  titulo: string;
+  descricao: string;
+}
+
+export interface ClienteDetalhes {
+  problemas: ProblemaDetalhe[];
+}
+
 export interface AppApi {
   settings: {
     get(): Promise<AppSettings>;
@@ -49,6 +69,14 @@ export interface AppApi {
     list(): Promise<string[]>;
     create(nome: string): Promise<void>;
     delete(nome: string): Promise<boolean>;
+  };
+  clienteDados: {
+    get(empresa: string): Promise<ClienteDados | null>;
+    save(empresa: string, dados: ClienteDados): Promise<void>;
+  };
+  clienteDetalhes: {
+    get(empresa: string): Promise<ClienteDetalhes | null>;
+    save(empresa: string, detalhes: ClienteDetalhes): Promise<void>;
   };
   visitas: {
     listMeses(empresa: string): Promise<string[]>;

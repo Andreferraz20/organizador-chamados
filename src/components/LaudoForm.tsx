@@ -81,7 +81,7 @@ export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
     { key: "laudoTecnico", label: "Laudo Técnico", multiline: true, rows: 6 },
     { key: "pecasSolicitadas", label: "Peças Solicitadas", multiline: true, rows: 3 },
     { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?", multiline: true, rows: 3 },
-    { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica" },
+    { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica", multiline: true, rows: 3 },
   ];
 
   return (

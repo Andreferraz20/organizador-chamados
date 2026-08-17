@@ -33,15 +33,6 @@ const styles = StyleSheet.create({
   footer: { position: "absolute", bottom: 30, left: 40, right: 40, fontSize: 8, color: "#999999" },
 });
 
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value || "-"}</Text>
-    </View>
-  );
-}
-
 function MultilineField({ label, value }: { label: string; value: string }) {
   const lines = value ? value.split("\n") : ["-"];
   return (
@@ -69,7 +60,7 @@ function LaudoDocument({ data }: { data: LaudoData }) {
         <MultilineField label="Laudo Técnico" value={data.laudoTecnico} />
         <MultilineField label="Peças Solicitadas" value={data.pecasSolicitadas} />
         <MultilineField label="Foi utilizado algum material do estoque técnico?" value={data.materialEstoque} />
-        <Field label="Dados de quem acompanhou a visita técnica" value={data.acompanhante} />
+        <MultilineField label="Dados de quem acompanhou a visita técnica" value={data.acompanhante} />
 
         <Text style={styles.footer}>Gerado em {data.geradoEm}</Text>
       </Page>

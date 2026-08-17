@@ -11,6 +11,14 @@ contextBridge.exposeInMainWorld("app", {
     create: (nome: string) => ipcRenderer.invoke("empresas:create", nome),
     delete: (nome: string) => ipcRenderer.invoke("empresas:delete", nome),
   },
+  clienteDados: {
+    get: (empresa: string) => ipcRenderer.invoke("clienteDados:get", empresa),
+    save: (empresa: string, dados: unknown) => ipcRenderer.invoke("clienteDados:save", empresa, dados),
+  },
+  clienteDetalhes: {
+    get: (empresa: string) => ipcRenderer.invoke("clienteDetalhes:get", empresa),
+    save: (empresa: string, detalhes: unknown) => ipcRenderer.invoke("clienteDetalhes:save", empresa, detalhes),
+  },
   visitas: {
     listMeses: (empresa: string) => ipcRenderer.invoke("visitas:listMeses", empresa),
     listVisitas: (empresa: string, mes: string) => ipcRenderer.invoke("visitas:listVisitas", empresa, mes),

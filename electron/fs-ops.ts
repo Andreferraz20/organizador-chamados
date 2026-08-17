@@ -29,6 +29,26 @@ interface FileEntry {
   mimeType: string;
 }
 
+interface Pessoa {
+  nome: string;
+  contato: string;
+}
+
+interface ClienteDados {
+  nome: string;
+  endereco: string;
+  pessoas: Pessoa[];
+}
+
+interface ProblemaDetalhe {
+  titulo: string;
+  descricao: string;
+}
+
+interface ClienteDetalhes {
+  problemas: ProblemaDetalhe[];
+}
+
 const DEFAULT_SETTINGS: AppSettings = {
   rootFolder: null,
   tiposDeVisita: [
@@ -152,6 +172,14 @@ function visitaPath(root: string, ref: VisitaRef, tiposConfig: TipoVisitaConfig[
   return path.join(root, sanitizeName(ref.empresa), ref.mes, visitaFolderName(ref, tiposConfig));
 }
 
+function clienteDadosPath(root: string, empresa: string): string {
+  return path.join(root, sanitizeName(empresa), "cliente-dados.json");
+}
+
+function clienteDetalhesPath(root: string, empresa: string): string {
+  return path.join(root, sanitizeName(empresa), "cliente-detalhes.json");
+}
+
 function mimeTypeFor(fileName: string): string {
   const ext = path.extname(fileName).toLowerCase();
   if (IMAGE_EXTENSIONS.includes(ext)) return `image/${ext.slice(1)}`;
@@ -210,12 +238,46 @@ export function registerFsHandlers(): void {
       buttons: ["Cancelar", "Excluir"],
       defaultId: 0,
       cancelId: 0,
-      message: `Excluir a empresa "${nome}"?`,
-      detail: "Isso apaga todas as visitas, fotos, vídeos e laudos dessa empresa. Não é possível desfazer.",
+      message: `Excluir o cliente "${nome}"?`,
+      detail: "Isso apaga todos os dados, visitas, fotos, vídeos e laudos desse cliente. Não é possível desfazer.",
     });
     if (response !== 1) return false;
     await fs.rm(target, { recursive: true, force: true });
     return true;
+  });
+
+  ipcMain.handle("clienteDados:get", async (_event, empresa: string) => {
+    const root = await ensureRootFolder();
+    try {
+      const raw = await fs.readFile(clienteDadosPath(root, empresa), "utf-8");
+      return JSON.parse(raw) as ClienteDados;
+    } catch {
+      return null;
+    }
+  });
+
+  ipcMain.handle("clienteDados:save", async (_event, empresa: string, dados: ClienteDados) => {
+    const root = await ensureRootFolder();
+    const target = clienteDadosPath(root, empresa);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, JSON.stringify(dados, null, 2), "utf-8");
+  });
+
+  ipcMain.handle("clienteDetalhes:get", async (_event, empresa: string) => {
+    const root = await ensureRootFolder();
+    try {
+      const raw = await fs.readFile(clienteDetalhesPath(root, empresa), "utf-8");
+      return JSON.parse(raw) as ClienteDetalhes;
+    } catch {
+      return null;
+    }
+  });
+
+  ipcMain.handle("clienteDetalhes:save", async (_event, empresa: string, detalhes: ClienteDetalhes) => {
+    const root = await ensureRootFolder();
+    const target = clienteDetalhesPath(root, empresa);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, JSON.stringify(detalhes, null, 2), "utf-8");
   });
 
   ipcMain.handle("visitas:listMeses", async (_event, empresa: string) => {

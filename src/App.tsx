@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { api } from "./lib/api";
 import { useTheme } from "./lib/theme";
 import { Home } from "./pages/Home";
-import { Empresa } from "./pages/Empresa";
+import { Cliente } from "./pages/Cliente";
 import { Visita } from "./pages/Visita";
 import { Settings } from "./pages/Settings";
 import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
   | { name: "home" }
-  | { name: "empresa"; empresa: string; autoAbrirForm?: boolean }
+  | { name: "cliente"; empresa: string }
   | { name: "visita"; ref: VisitaRef }
   | { name: "settings" };
 
@@ -64,16 +64,15 @@ export default function App() {
 
       {route.name === "home" && (
         <Home
-          onOpenEmpresa={(empresa, autoAbrirForm) => setRoute({ name: "empresa", empresa, autoAbrirForm })}
+          onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />
       )}
 
-      {route.name === "empresa" && (
-        <Empresa
+      {route.name === "cliente" && (
+        <Cliente
           empresa={route.empresa}
           tiposDeVisita={tiposDeVisita}
-          autoAbrirForm={route.autoAbrirForm}
           onBack={() => setRoute({ name: "home" })}
           onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
         />
@@ -83,7 +82,7 @@ export default function App() {
         <Visita
           visitaRef={route.ref}
           acompanhantePadrao={acompanhantePadrao}
-          onBack={() => setRoute({ name: "empresa", empresa: route.ref.empresa })}
+          onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
         />
       )}
 
