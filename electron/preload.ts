@@ -30,9 +30,12 @@ contextBridge.exposeInMainWorld("app", {
     pickFiles: () => ipcRenderer.invoke("arquivos:pickFiles"),
     add: (ref: unknown, sourcePaths: string[]) => ipcRenderer.invoke("arquivos:add", ref, sourcePaths),
     remove: (ref: unknown, fileName: string) => ipcRenderer.invoke("arquivos:remove", ref, fileName),
+    rename: (ref: unknown, oldName: string, newName: string) =>
+      ipcRenderer.invoke("arquivos:rename", ref, oldName, newName),
     openInExplorer: (ref: unknown) => ipcRenderer.invoke("arquivos:openInExplorer", ref),
     openFile: (filePath: string) => ipcRenderer.invoke("arquivos:openFile", filePath),
     showInFolder: (filePath: string) => ipcRenderer.invoke("arquivos:showInFolder", filePath),
+    startDrag: (filePath: string) => ipcRenderer.send("arquivos:startDrag", filePath),
   },
   laudo: {
     get: (ref: unknown) => ipcRenderer.invoke("laudo:get", ref),

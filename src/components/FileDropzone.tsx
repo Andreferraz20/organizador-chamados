@@ -16,6 +16,13 @@ function isVideo(mimeType: string): boolean {
   return mimeType.startsWith("video/");
 }
 
+/** Separa nome-base e extensão (com o ponto), pra manter a extensão fixa ao renomear. */
+function splitExt(fileName: string): { base: string; ext: string } {
+  const dot = fileName.lastIndexOf(".");
+  if (dot <= 0) return { base: fileName, ext: "" };
+  return { base: fileName.slice(0, dot), ext: fileName.slice(dot) };
+}
+
 function loadThumbSize(): number {
   const stored = Number(localStorage.getItem(THUMB_SIZE_KEY));
   return stored >= MIN_THUMB && stored <= MAX_THUMB ? stored : 140;
@@ -37,6 +44,10 @@ export function FileDropzone({ visitaRef }: Props) {
   const [busy, setBusy] = useState(false);
   const [thumbSize, setThumbSize] = useState(loadThumbSize);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [renameTarget, setRenameTarget] = useState<FileEntry | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState(false);
 
   const refresh = useCallback(async () => {
     const list = await api.arquivos.list(visitaRef);
@@ -90,6 +101,30 @@ export function FileDropzone({ visitaRef }: Props) {
   async function handleRemove(fileName: string) {
     await api.arquivos.remove(visitaRef, fileName);
     refresh();
+  }
+
+  function openRename(file: FileEntry) {
+    setRenameTarget(file);
+    setRenameValue(splitExt(file.name).base);
+    setRenameError(null);
+  }
+
+  async function confirmRename() {
+    if (!renameTarget) return;
+    const { ext } = splitExt(renameTarget.name);
+    const newName = renameValue.trim();
+    if (!newName) return;
+    setRenaming(true);
+    setRenameError(null);
+    try {
+      await api.arquivos.rename(visitaRef, renameTarget.name, `${newName}${ext}`);
+      setRenameTarget(null);
+      refresh();
+    } catch (error) {
+      setRenameError(error instanceof Error ? error.message : "Não foi possível renomear.");
+    } finally {
+      setRenaming(false);
+    }
   }
 
   const fotos = files.filter((f) => !isVideo(f.mimeType));
@@ -167,10 +202,16 @@ export function FileDropzone({ visitaRef }: Props) {
             Abrir
           </button>
           <button
+            onClick={() => openRename(contextMenu.file)}
+            className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            Renomear
+          </button>
+          <button
             onClick={() => api.arquivos.showInFolder(contextMenu.file.path)}
             className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
           >
-            Ver local do arquivo
+            Abrir local do arquivo
           </button>
           <button
             onClick={() => handleRemove(contextMenu.file.name)}
@@ -178,6 +219,40 @@ export function FileDropzone({ visitaRef }: Props) {
           >
             Remover
           </button>
+        </div>
+      )}
+
+      {renameTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Renomear arquivo</h3>
+            <div className="flex items-center gap-1">
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && confirmRename()}
+                className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              />
+              <span className="shrink-0 text-sm text-slate-500 dark:text-slate-400">{splitExt(renameTarget.name).ext}</span>
+            </div>
+            {renameError && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{renameError}</p>}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setRenameTarget(null)}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmRename}
+                disabled={renaming || !renameValue.trim()}
+                className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {renaming ? "Renomeando…" : "Renomear"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -213,6 +288,11 @@ function MediaColumn({
           {files.map((f) => (
             <div
               key={f.name}
+              draggable
+              onDragStart={(e) => {
+                e.preventDefault();
+                api.arquivos.startDrag(f.path);
+              }}
               onDoubleClick={() => onOpen(f)}
               onContextMenu={(e) => {
                 e.preventDefault();

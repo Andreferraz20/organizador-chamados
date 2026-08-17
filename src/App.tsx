@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "./lib/api";
 import { useTheme } from "./lib/theme";
+import { MainMenu } from "./pages/MainMenu";
 import { Home } from "./pages/Home";
 import { Cliente } from "./pages/Cliente";
 import { Visita } from "./pages/Visita";
@@ -8,6 +9,7 @@ import { Settings } from "./pages/Settings";
 import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
+  | { name: "menu" }
   | { name: "home" }
   | { name: "cliente"; empresa: string }
   | { name: "visita"; ref: VisitaRef }
@@ -35,7 +37,7 @@ function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: (
 }
 
 export default function App() {
-  const [route, setRoute] = useState<Route>({ name: "home" });
+  const [route, setRoute] = useState<Route>({ name: "menu" });
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const { theme, toggle } = useTheme();
 
@@ -62,8 +64,11 @@ export default function App() {
     <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
       <ThemeToggle theme={theme} onToggle={toggle} />
 
+      {route.name === "menu" && <MainMenu onOpenAtendimentos={() => setRoute({ name: "home" })} />}
+
       {route.name === "home" && (
         <Home
+          onBack={() => setRoute({ name: "menu" })}
           onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />

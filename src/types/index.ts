@@ -92,9 +92,11 @@ export interface AppApi {
     pickFiles(): Promise<string[]>;
     add(ref: VisitaRef, sourcePaths: string[]): Promise<FileEntry[]>;
     remove(ref: VisitaRef, fileName: string): Promise<void>;
+    rename(ref: VisitaRef, oldName: string, newName: string): Promise<void>;
     openInExplorer(ref: VisitaRef): Promise<void>;
     openFile(filePath: string): Promise<void>;
     showInFolder(filePath: string): Promise<void>;
+    startDrag(filePath: string): void;
   };
   laudo: {
     get(ref: VisitaRef): Promise<LaudoData | null>;

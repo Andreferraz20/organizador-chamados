@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, shell } from "electron";
+import { app, dialog, ipcMain, nativeImage, shell } from "electron";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
@@ -66,6 +66,19 @@ const DEFAULT_SETTINGS: AppSettings = {
 const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".heic", ".webp", ".gif"];
 const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".mkv", ".webm"];
 const MIDIA_DIR = "fotos-videos";
+
+/** Ícone cinza sólido usado no arraste nativo quando o arquivo (ex: vídeo) não dá pra virar thumbnail. */
+function createFallbackDragIcon() {
+  const size = 32;
+  const buffer = Buffer.alloc(size * size * 4);
+  for (let i = 0; i < buffer.length; i += 4) {
+    buffer[i] = 148; // B
+    buffer[i + 1] = 148; // G
+    buffer[i + 2] = 148; // R
+    buffer[i + 3] = 255; // A
+  }
+  return nativeImage.createFromBuffer(buffer, { width: size, height: size });
+}
 
 /** Gera uma sigla a partir de um nome livre, quando não há sigla configurada. */
 function fallbackSigla(tipo: string): string {
@@ -355,6 +368,20 @@ export function registerFsHandlers(): void {
     const { root, tiposDeVisita } = await ensureContext();
     const filePath = path.join(visitaPath(root, ref, tiposDeVisita), MIDIA_DIR, fileName);
     await fs.unlink(filePath);
+  });
+
+  ipcMain.handle("arquivos:rename", async (_event, ref: VisitaRef, oldName: string, newName: string) => {
+    const { root, tiposDeVisita } = await ensureContext();
+    const dir = path.join(visitaPath(root, ref, tiposDeVisita), MIDIA_DIR);
+    await fs.rename(path.join(dir, oldName), path.join(dir, sanitizeName(newName)));
+  });
+
+  ipcMain.on("arquivos:startDrag", (event, filePath: string) => {
+    let icon = nativeImage.createFromPath(filePath).resize({ width: 64, height: 64 });
+    if (icon.isEmpty()) {
+      icon = createFallbackDragIcon();
+    }
+    event.sender.startDrag({ file: filePath, icon });
   });
 
   ipcMain.handle("arquivos:openInExplorer", async (_event, ref: VisitaRef) => {

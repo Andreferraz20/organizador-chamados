@@ -1,5 +1,5 @@
 appId: com.organizadorchamados.app
-productName: Área Técnica
+productName: Área do Técnico
 directories:
   output: release
 files:

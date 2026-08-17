@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 
 interface Props {
+  onBack: () => void;
   onOpenCliente: (empresa: string) => void;
   onOpenSettings: () => void;
 }
 
-export function Home({ onOpenCliente, onOpenSettings }: Props) {
+export function Home({ onBack, onOpenCliente, onOpenSettings }: Props) {
   const [rootFolder, setRootFolder] = useState<string | null | undefined>(undefined);
   const [empresas, setEmpresas] = useState<string[]>([]);
   const [novoNome, setNovoNome] = useState("");
@@ -68,11 +69,19 @@ export function Home({ onOpenCliente, onOpenSettings }: Props) {
 
   return (
     <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Clientes</h1>
-        <button onClick={onOpenSettings} className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-          Ajustes
+      <div className="mb-6">
+        <button
+          onClick={onBack}
+          className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          ← Menu
         </button>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Clientes</h1>
+          <button onClick={onOpenSettings} className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+            Ajustes
+          </button>
+        </div>
       </div>
 
       <div className="mb-6 flex gap-2">
