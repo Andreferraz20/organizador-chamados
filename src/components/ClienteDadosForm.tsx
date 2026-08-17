@@ -5,17 +5,19 @@ import type { ClienteDados, Pessoa } from "../types";
 
 interface Props {
   empresa: string;
+  onRenamed: (newEmpresa: string) => void;
 }
 
 function emptyDados(empresa: string): ClienteDados {
   return { nome: empresa, endereco: "", pessoas: [] };
 }
 
-export function ClienteDadosForm({ empresa }: Props) {
+export function ClienteDadosForm({ empresa, onRenamed }: Props) {
   const [form, setForm] = useState<ClienteDados>(() => emptyDados(empresa));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,10 +58,22 @@ export function ClienteDadosForm({ empresa }: Props) {
 
   async function handleSave() {
     setSaving(true);
+    setSaveError(null);
     try {
-      await api.clienteDados.save(empresa, form);
+      const trimmedNome = form.nome.trim();
+      let targetEmpresa = empresa;
+      let dataToSave = form;
+      if (trimmedNome && trimmedNome !== empresa) {
+        targetEmpresa = await api.empresas.rename(empresa, trimmedNome);
+        dataToSave = { ...form, nome: targetEmpresa };
+        setForm(dataToSave);
+      }
+      await api.clienteDados.save(targetEmpresa, dataToSave);
+      if (targetEmpresa !== empresa) onRenamed(targetEmpresa);
       setSavedMessage("Salvo.");
       setTimeout(() => setSavedMessage(null), 1500);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Não foi possível salvar.");
     } finally {
       setSaving(false);
     }
@@ -80,6 +94,9 @@ export function ClienteDadosForm({ empresa }: Props) {
           onChange={(e) => update("nome", e.target.value)}
           className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         />
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+          Ao salvar com um nome diferente, a pasta do cliente é renomeada junto.
+        </p>
       </div>
 
       <div>
@@ -182,6 +199,7 @@ export function ClienteDadosForm({ empresa }: Props) {
           {saving ? "Salvando…" : "Salvar"}
         </button>
         {savedMessage && <span className="text-sm text-green-600 dark:text-green-400">{savedMessage}</span>}
+        {saveError && <span className="text-sm text-red-600 dark:text-red-400">{saveError}</span>}
       </div>
     </div>
   );

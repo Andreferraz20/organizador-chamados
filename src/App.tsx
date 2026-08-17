@@ -80,6 +80,7 @@ export default function App() {
           tiposDeVisita={tiposDeVisita}
           onBack={() => setRoute({ name: "home" })}
           onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+          onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
         />
       )}
 

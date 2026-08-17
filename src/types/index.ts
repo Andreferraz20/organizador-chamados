@@ -72,6 +72,7 @@ export interface AppApi {
     list(): Promise<string[]>;
     create(nome: string): Promise<void>;
     delete(nome: string): Promise<boolean>;
+    rename(oldNome: string, newNome: string): Promise<string>;
   };
   clienteDados: {
     get(empresa: string): Promise<ClienteDados | null>;

@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("app", {
     list: () => ipcRenderer.invoke("empresas:list"),
     create: (nome: string) => ipcRenderer.invoke("empresas:create", nome),
     delete: (nome: string) => ipcRenderer.invoke("empresas:delete", nome),
+    rename: (oldNome: string, newNome: string) => ipcRenderer.invoke("empresas:rename", oldNome, newNome),
   },
   clienteDados: {
     get: (empresa: string) => ipcRenderer.invoke("clienteDados:get", empresa),

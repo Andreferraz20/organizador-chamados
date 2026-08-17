@@ -262,6 +262,20 @@ export function registerFsHandlers(): void {
     return true;
   });
 
+  ipcMain.handle("empresas:rename", async (_event, oldNome: string, newNome: string) => {
+    const root = await ensureRootFolder();
+    const safeNewName = sanitizeName(newNome);
+    if (!safeNewName) throw new Error("Nome inválido.");
+    const oldPath = path.join(root, sanitizeName(oldNome));
+    const newPath = path.join(root, safeNewName);
+    if (oldPath === newPath) return safeNewName;
+    if (fsSync.existsSync(newPath)) {
+      throw new Error(`Já existe um cliente chamado "${safeNewName}".`);
+    }
+    await fs.rename(oldPath, newPath);
+    return safeNewName;
+  });
+
   ipcMain.handle("clienteDados:get", async (_event, empresa: string) => {
     const root = await ensureRootFolder();
     try {

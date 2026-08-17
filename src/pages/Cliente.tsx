@@ -9,6 +9,7 @@ interface Props {
   tiposDeVisita: string[];
   onBack: () => void;
   onOpenVisita: (ref: VisitaRef) => void;
+  onRenamed: (newEmpresa: string) => void;
 }
 
 type Tab = "dados" | "detalhes" | "visitas";
@@ -19,7 +20,7 @@ const TABS: [Tab, string][] = [
   ["visitas", "Visitas Técnicas"],
 ];
 
-export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props) {
+export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRenamed }: Props) {
   const [tab, setTab] = useState<Tab>("dados");
 
   return (
@@ -51,7 +52,7 @@ export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita }: Props)
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {tab === "dados" && <ClienteDadosForm empresa={empresa} />}
+        {tab === "dados" && <ClienteDadosForm empresa={empresa} onRenamed={onRenamed} />}
         {tab === "detalhes" && <ClienteDetalhesForm empresa={empresa} />}
         {tab === "visitas" && (
           <VisitasTecnicas empresa={empresa} tiposDeVisita={tiposDeVisita} onOpenVisita={onOpenVisita} />
