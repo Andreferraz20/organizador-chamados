@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, nativeImage, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, shell } from "electron";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
@@ -424,6 +424,43 @@ export function registerFsHandlers(): void {
     const laudoDir = path.join(visitaPath(root, ref, tiposDeVisita), "laudo");
     await fs.mkdir(laudoDir, { recursive: true });
     await fs.writeFile(path.join(laudoDir, "laudo.json"), JSON.stringify(data, null, 2), "utf-8");
+  });
+}
+
+/**
+ * Menu de contexto nativo do Electron pras miniaturas de foto/vídeo.
+ *
+ * Usa webContents "context-menu" (nível do processo principal) em vez do evento
+ * "contextmenu" do DOM: em alguns setups o clique direito de verdade não estava
+ * disparando o evento do DOM (só funcionava disparando via JS manualmente), então
+ * um menu nativo — que não depende desse pipeline de eventos da página — é mais robusto.
+ */
+export function registerMediaContextMenu(win: BrowserWindow): void {
+  win.webContents.on("context-menu", (_event, params) => {
+    if (params.mediaType !== "image" && params.mediaType !== "video") return;
+
+    let filePath: string;
+    try {
+      filePath = new URL(params.srcURL).searchParams.get("path") ?? "";
+    } catch {
+      return;
+    }
+    if (!filePath) return;
+
+    const menu = Menu.buildFromTemplate([
+      { label: "Abrir", click: () => shell.openPath(filePath) },
+      { label: "Renomear", click: () => win.webContents.send("media:rename", filePath) },
+      { label: "Abrir local do arquivo", click: () => shell.showItemInFolder(filePath) },
+      { type: "separator" },
+      {
+        label: "Remover",
+        click: async () => {
+          await fs.unlink(filePath);
+          win.webContents.send("media:refresh");
+        },
+      },
+    ]);
+    menu.popup({ window: win });
   });
 }
 

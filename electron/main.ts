@@ -1,7 +1,7 @@
 import { app, BrowserWindow, net, protocol } from "electron";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { registerFsHandlers } from "./fs-ops";
+import { registerFsHandlers, registerMediaContextMenu } from "./fs-ops";
 import { registerPdfHandlers } from "./pdf";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +39,8 @@ function createWindow() {
   win.webContents.on("preload-error", (_event, preloadPath, error) => {
     console.error("[preload-error]", preloadPath, error);
   });
+
+  registerMediaContextMenu(win);
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);

@@ -32,23 +32,17 @@ interface Props {
   visitaRef: VisitaRef;
 }
 
-interface ContextMenuState {
-  file: FileEntry;
-  x: number;
-  y: number;
-}
-
 export function FileDropzone({ visitaRef }: Props) {
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [thumbSize, setThumbSize] = useState(loadThumbSize);
-  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [renameTarget, setRenameTarget] = useState<FileEntry | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameError, setRenameError] = useState<string | null>(null);
   const [renaming, setRenaming] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const filesRef = useRef<FileEntry[]>([]);
 
   const refresh = useCallback(async () => {
     const list = await api.arquivos.list(visitaRef);
@@ -64,15 +58,25 @@ export function FileDropzone({ visitaRef }: Props) {
   }, [thumbSize]);
 
   useEffect(() => {
-    if (!contextMenu) return;
-    const close = () => setContextMenu(null);
-    window.addEventListener("click", close);
-    window.addEventListener("contextmenu", close);
-    return () => {
-      window.removeEventListener("click", close);
-      window.removeEventListener("contextmenu", close);
-    };
-  }, [contextMenu]);
+    filesRef.current = files;
+  }, [files]);
+
+  // O menu de contexto (clique direito) é nativo, construído no processo principal
+  // (ver registerMediaContextMenu em electron/fs-ops.ts) — o evento "contextmenu" do
+  // DOM não estava disparando de forma confiável pra clique direito de verdade.
+  useEffect(() => {
+    return api.media.onRename((filePath) => {
+      const file = filesRef.current.find((f) => f.path === filePath);
+      if (file) openRename(file);
+    });
+  }, []);
+
+  useEffect(() => {
+    return api.media.onRefresh(() => {
+      setSelected(new Set());
+      refresh();
+    });
+  }, [refresh]);
 
   async function addPaths(paths: string[]) {
     if (paths.length === 0) return;
@@ -212,7 +216,6 @@ export function FileDropzone({ visitaRef }: Props) {
             thumbSize={thumbSize}
             selected={selected}
             onOpen={(f) => api.arquivos.openFile(f.path)}
-            onContextMenu={(f, e) => setContextMenu({ file: f, x: e.clientX, y: e.clientY })}
             onRemove={handleRemove}
             onSelectOnly={selectOnly}
             onToggleSelect={toggleSelect}
@@ -226,7 +229,6 @@ export function FileDropzone({ visitaRef }: Props) {
             thumbSize={thumbSize}
             selected={selected}
             onOpen={(f) => api.arquivos.openFile(f.path)}
-            onContextMenu={(f, e) => setContextMenu({ file: f, x: e.clientX, y: e.clientY })}
             onRemove={handleRemove}
             onSelectOnly={selectOnly}
             onToggleSelect={toggleSelect}
@@ -237,38 +239,6 @@ export function FileDropzone({ visitaRef }: Props) {
         </div>
       ) : (
         <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Nenhum arquivo ainda.</p>
-      )}
-
-      {contextMenu && (
-        <div
-          style={{ top: contextMenu.y, left: contextMenu.x }}
-          className="fixed z-50 w-52 overflow-hidden rounded-md border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-slate-700 dark:bg-slate-800"
-        >
-          <button
-            onClick={() => api.arquivos.openFile(contextMenu.file.path)}
-            className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            Abrir
-          </button>
-          <button
-            onClick={() => openRename(contextMenu.file)}
-            className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            Renomear
-          </button>
-          <button
-            onClick={() => api.arquivos.showInFolder(contextMenu.file.path)}
-            className="block w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-          >
-            Abrir local do arquivo
-          </button>
-          <button
-            onClick={() => handleRemove(contextMenu.file.name)}
-            className="block w-full px-3 py-1.5 text-left text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
-          >
-            Remover
-          </button>
-        </div>
       )}
 
       {renameTarget && (
@@ -321,7 +291,6 @@ function MediaColumn({
   thumbSize,
   selected,
   onOpen,
-  onContextMenu,
   onRemove,
   onSelectOnly,
   onToggleSelect,
@@ -334,7 +303,6 @@ function MediaColumn({
   thumbSize: number;
   selected: Set<string>;
   onOpen: (file: FileEntry) => void;
-  onContextMenu: (file: FileEntry, e: React.MouseEvent) => void;
   onRemove: (fileName: string) => void;
   onSelectOnly: (path: string) => void;
   onToggleSelect: (path: string) => void;
@@ -425,10 +393,6 @@ function MediaColumn({
                 onStartDrag(f.path);
               }}
               onDoubleClick={() => onOpen(f)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                onContextMenu(f, e);
-              }}
               title={f.name}
               className={`group relative cursor-pointer overflow-hidden rounded-lg border bg-slate-100 dark:bg-slate-900 ${
                 isSelected

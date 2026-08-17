@@ -104,6 +104,10 @@ export interface AppApi {
     save(ref: VisitaRef, data: LaudoData): Promise<void>;
     generate(ref: VisitaRef, data: LaudoData): Promise<string>;
   };
+  media: {
+    onRename(callback: (filePath: string) => void): () => void;
+    onRefresh(callback: () => void): () => void;
+  };
 }
 
 declare global {

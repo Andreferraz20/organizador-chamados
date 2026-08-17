@@ -43,4 +43,16 @@ contextBridge.exposeInMainWorld("app", {
     save: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:save", ref, data),
     generate: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:generate", ref, data),
   },
+  media: {
+    onRename: (callback: (filePath: string) => void) => {
+      const listener = (_event: unknown, filePath: string) => callback(filePath);
+      ipcRenderer.on("media:rename", listener);
+      return () => ipcRenderer.removeListener("media:rename", listener);
+    },
+    onRefresh: (callback: () => void) => {
+      const listener = () => callback();
+      ipcRenderer.on("media:refresh", listener);
+      return () => ipcRenderer.removeListener("media:refresh", listener);
+    },
+  },
 });
