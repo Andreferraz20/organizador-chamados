@@ -376,12 +376,13 @@ export function registerFsHandlers(): void {
     await fs.rename(path.join(dir, oldName), path.join(dir, sanitizeName(newName)));
   });
 
-  ipcMain.on("arquivos:startDrag", (event, filePath: string) => {
-    let icon = nativeImage.createFromPath(filePath).resize({ width: 64, height: 64 });
+  ipcMain.on("arquivos:startDrag", (event, filePaths: string[]) => {
+    if (filePaths.length === 0) return;
+    let icon = nativeImage.createFromPath(filePaths[0]).resize({ width: 64, height: 64 });
     if (icon.isEmpty()) {
       icon = createFallbackDragIcon();
     }
-    event.sender.startDrag({ file: filePath, icon });
+    event.sender.startDrag({ file: filePaths[0], files: filePaths, icon });
   });
 
   ipcMain.handle("arquivos:openInExplorer", async (_event, ref: VisitaRef) => {

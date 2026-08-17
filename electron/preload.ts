@@ -35,7 +35,7 @@ contextBridge.exposeInMainWorld("app", {
     openInExplorer: (ref: unknown) => ipcRenderer.invoke("arquivos:openInExplorer", ref),
     openFile: (filePath: string) => ipcRenderer.invoke("arquivos:openFile", filePath),
     showInFolder: (filePath: string) => ipcRenderer.invoke("arquivos:showInFolder", filePath),
-    startDrag: (filePath: string) => ipcRenderer.send("arquivos:startDrag", filePath),
+    startDrag: (filePaths: string[]) => ipcRenderer.send("arquivos:startDrag", filePaths),
   },
   laudo: {
     get: (ref: unknown) => ipcRenderer.invoke("laudo:get", ref),

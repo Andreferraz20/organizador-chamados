@@ -96,7 +96,7 @@ export interface AppApi {
     openInExplorer(ref: VisitaRef): Promise<void>;
     openFile(filePath: string): Promise<void>;
     showInFolder(filePath: string): Promise<void>;
-    startDrag(filePath: string): void;
+    startDrag(filePaths: string[]): void;
   };
   laudo: {
     get(ref: VisitaRef): Promise<LaudoData | null>;

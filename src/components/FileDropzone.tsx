@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, toMediaUrl } from "../lib/api";
 import type { FileEntry, VisitaRef } from "../types";
 
@@ -48,6 +48,7 @@ export function FileDropzone({ visitaRef }: Props) {
   const [renameValue, setRenameValue] = useState("");
   const [renameError, setRenameError] = useState<string | null>(null);
   const [renaming, setRenaming] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     const list = await api.arquivos.list(visitaRef);
@@ -100,7 +101,31 @@ export function FileDropzone({ visitaRef }: Props) {
 
   async function handleRemove(fileName: string) {
     await api.arquivos.remove(visitaRef, fileName);
+    setSelected(new Set());
     refresh();
+  }
+
+  function selectOnly(path: string) {
+    setSelected(new Set([path]));
+  }
+
+  function toggleSelect(path: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  }
+
+  function setMarqueeSelection(paths: string[]) {
+    setSelected(new Set(paths));
+  }
+
+  function startDragSelection(path: string) {
+    const paths = selected.has(path) && selected.size > 1 ? Array.from(selected) : [path];
+    if (!selected.has(path)) selectOnly(path);
+    api.arquivos.startDrag(paths);
   }
 
   function openRename(file: FileEntry) {
@@ -119,6 +144,7 @@ export function FileDropzone({ visitaRef }: Props) {
     try {
       await api.arquivos.rename(visitaRef, renameTarget.name, `${newName}${ext}`);
       setRenameTarget(null);
+      setSelected(new Set());
       refresh();
     } catch (error) {
       setRenameError(error instanceof Error ? error.message : "Não foi possível renomear.");
@@ -153,17 +179,28 @@ export function FileDropzone({ visitaRef }: Props) {
       </div>
 
       {files.length > 0 && (
-        <div className="mt-4 flex items-center gap-2">
-          <label className="text-xs text-slate-500 dark:text-slate-400">Tamanho do preview</label>
-          <input
-            type="range"
-            min={MIN_THUMB}
-            max={MAX_THUMB}
-            step={10}
-            value={thumbSize}
-            onChange={(e) => setThumbSize(Number(e.target.value))}
-            className="w-40"
-          />
+        <div className="mt-4 flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-slate-500 dark:text-slate-400">Tamanho do preview</label>
+            <input
+              type="range"
+              min={MIN_THUMB}
+              max={MAX_THUMB}
+              step={10}
+              value={thumbSize}
+              onChange={(e) => setThumbSize(Number(e.target.value))}
+              className="w-40"
+            />
+          </div>
+          {selected.size > 0 ? (
+            <span className="text-xs text-blue-600 dark:text-blue-400">
+              {selected.size} selecionado{selected.size > 1 ? "s" : ""} — arraste para enviar
+            </span>
+          ) : (
+            <span className="text-xs text-slate-400 dark:text-slate-500">
+              Arraste sobre as fotos pra selecionar várias
+            </span>
+          )}
         </div>
       )}
 
@@ -173,17 +210,29 @@ export function FileDropzone({ visitaRef }: Props) {
             title="Fotos"
             files={fotos}
             thumbSize={thumbSize}
+            selected={selected}
             onOpen={(f) => api.arquivos.openFile(f.path)}
             onContextMenu={(f, e) => setContextMenu({ file: f, x: e.clientX, y: e.clientY })}
             onRemove={handleRemove}
+            onSelectOnly={selectOnly}
+            onToggleSelect={toggleSelect}
+            onMarqueeSelect={setMarqueeSelection}
+            onClearSelection={() => setSelected(new Set())}
+            onStartDrag={startDragSelection}
           />
           <MediaColumn
             title="Vídeos"
             files={videos}
             thumbSize={thumbSize}
+            selected={selected}
             onOpen={(f) => api.arquivos.openFile(f.path)}
             onContextMenu={(f, e) => setContextMenu({ file: f, x: e.clientX, y: e.clientY })}
             onRemove={handleRemove}
+            onSelectOnly={selectOnly}
+            onToggleSelect={toggleSelect}
+            onMarqueeSelect={setMarqueeSelection}
+            onClearSelection={() => setSelected(new Set())}
+            onStartDrag={startDragSelection}
           />
         </div>
       ) : (
@@ -259,21 +308,85 @@ export function FileDropzone({ visitaRef }: Props) {
   );
 }
 
+interface Marquee {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
 function MediaColumn({
   title,
   files,
   thumbSize,
+  selected,
   onOpen,
   onContextMenu,
   onRemove,
+  onSelectOnly,
+  onToggleSelect,
+  onMarqueeSelect,
+  onClearSelection,
+  onStartDrag,
 }: {
   title: string;
   files: FileEntry[];
   thumbSize: number;
+  selected: Set<string>;
   onOpen: (file: FileEntry) => void;
   onContextMenu: (file: FileEntry, e: React.MouseEvent) => void;
   onRemove: (fileName: string) => void;
+  onSelectOnly: (path: string) => void;
+  onToggleSelect: (path: string) => void;
+  onMarqueeSelect: (paths: string[]) => void;
+  onClearSelection: () => void;
+  onStartDrag: (path: string) => void;
 }) {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [marquee, setMarquee] = useState<Marquee | null>(null);
+
+  function handleGridMouseDown(e: React.MouseEvent) {
+    if (e.button !== 0 || e.target !== gridRef.current) return;
+    const container = gridRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const startX = e.clientX - rect.left;
+    const startY = e.clientY - rect.top;
+    let moved = false;
+    setMarquee({ x0: startX, y0: startY, x1: startX, y1: startY });
+
+    function handleMove(ev: MouseEvent) {
+      const curX = ev.clientX - rect.left;
+      const curY = ev.clientY - rect.top;
+      if (Math.abs(curX - startX) > 3 || Math.abs(curY - startY) > 3) moved = true;
+      setMarquee({ x0: startX, y0: startY, x1: curX, y1: curY });
+
+      const selLeft = Math.min(startX, curX) + rect.left;
+      const selRight = Math.max(startX, curX) + rect.left;
+      const selTop = Math.min(startY, curY) + rect.top;
+      const selBottom = Math.max(startY, curY) + rect.top;
+      const hits: string[] = [];
+      itemRefs.current.forEach((el, path) => {
+        const r = el.getBoundingClientRect();
+        if (r.left < selRight && r.right > selLeft && r.top < selBottom && r.bottom > selTop) {
+          hits.push(path);
+        }
+      });
+      onMarqueeSelect(hits);
+    }
+
+    function handleUp() {
+      if (!moved) onClearSelection();
+      setMarquee(null);
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    }
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+  }
+
   return (
     <div className="p-3">
       <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
@@ -284,14 +397,32 @@ function MediaColumn({
           {title === "Fotos" ? "Nenhuma foto ainda." : "Nenhum vídeo ainda."}
         </p>
       ) : (
-        <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbSize}px, 1fr))` }}>
-          {files.map((f) => (
+        <div
+          ref={gridRef}
+          onMouseDown={handleGridMouseDown}
+          className="relative grid select-none gap-3"
+          style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbSize}px, 1fr))` }}
+        >
+          {files.map((f) => {
+            const isSelected = selected.has(f.path);
+            return (
             <div
               key={f.name}
+              ref={(el) => {
+                if (el) itemRefs.current.set(f.path, el);
+                else itemRefs.current.delete(f.path);
+              }}
               draggable
+              onMouseDown={(e) => {
+                if (e.shiftKey || e.metaKey || e.ctrlKey) {
+                  onToggleSelect(f.path);
+                } else if (!isSelected) {
+                  onSelectOnly(f.path);
+                }
+              }}
               onDragStart={(e) => {
                 e.preventDefault();
-                api.arquivos.startDrag(f.path);
+                onStartDrag(f.path);
               }}
               onDoubleClick={() => onOpen(f)}
               onContextMenu={(e) => {
@@ -299,7 +430,11 @@ function MediaColumn({
                 onContextMenu(f, e);
               }}
               title={f.name}
-              className="group relative cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"
+              className={`group relative cursor-pointer overflow-hidden rounded-lg border bg-slate-100 dark:bg-slate-900 ${
+                isSelected
+                  ? "border-blue-500 ring-2 ring-blue-400"
+                  : "border-slate-200 dark:border-slate-800"
+              }`}
               style={{ aspectRatio: "1 / 1" }}
             >
               {isVideo(f.mimeType) ? (
@@ -335,7 +470,19 @@ function MediaColumn({
                 </svg>
               </button>
             </div>
-          ))}
+            );
+          })}
+          {marquee && (
+            <div
+              className="pointer-events-none absolute z-10 border border-blue-500 bg-blue-500/20"
+              style={{
+                left: Math.min(marquee.x0, marquee.x1),
+                top: Math.min(marquee.y0, marquee.y1),
+                width: Math.abs(marquee.x1 - marquee.x0),
+                height: Math.abs(marquee.y1 - marquee.y0),
+              }}
+            />
+          )}
         </div>
       )}
     </div>
