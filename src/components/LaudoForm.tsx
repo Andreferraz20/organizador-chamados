@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, partsToDate } from "../lib/api";
+import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import type { LaudoData, VisitaRef } from "../types";
 
 interface Props {
@@ -90,7 +91,7 @@ export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
         <div key={f.key}>
           <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{f.label}</label>
           {f.multiline ? (
-            <textarea
+            <AutoGrowTextarea
               value={form[f.key]}
               onChange={(e) => update(f.key, e.target.value)}
               rows={f.rows ?? 3}

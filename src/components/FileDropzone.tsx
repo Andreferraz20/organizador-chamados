@@ -92,6 +92,9 @@ export function FileDropzone({ visitaRef }: Props) {
     refresh();
   }
 
+  const fotos = files.filter((f) => !isVideo(f.mimeType));
+  const videos = files.filter((f) => isVideo(f.mimeType));
+
   return (
     <div>
       <div
@@ -130,56 +133,23 @@ export function FileDropzone({ visitaRef }: Props) {
       )}
 
       {files.length > 0 ? (
-        <div
-          className="mt-3 grid gap-3"
-          style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbSize}px, 1fr))` }}
-        >
-          {files.map((f) => (
-            <div
-              key={f.name}
-              onDoubleClick={() => api.arquivos.openFile(f.path)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                setContextMenu({ file: f, x: e.clientX, y: e.clientY });
-              }}
-              title={f.name}
-              className="group relative cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"
-              style={{ aspectRatio: "1 / 1" }}
-            >
-              {isVideo(f.mimeType) ? (
-                <video src={toMediaUrl(f.path)} muted preload="metadata" className="h-full w-full object-cover" />
-              ) : (
-                <img src={toMediaUrl(f.path)} loading="lazy" className="h-full w-full object-cover" />
-              )}
-
-              {isVideo(f.mimeType) && (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50">
-                    <svg viewBox="0 0 24 24" fill="white" className="ml-0.5 h-4 w-4">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
-                </div>
-              )}
-
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
-                {f.name} · {formatSize(f.sizeBytes)}
-              </div>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(f.name);
-                }}
-                title="Remover"
-                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
+        <div className="mt-3 grid grid-cols-2 divide-x divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+          <MediaColumn
+            title="Fotos"
+            files={fotos}
+            thumbSize={thumbSize}
+            onOpen={(f) => api.arquivos.openFile(f.path)}
+            onContextMenu={(f, e) => setContextMenu({ file: f, x: e.clientX, y: e.clientY })}
+            onRemove={handleRemove}
+          />
+          <MediaColumn
+            title="Vídeos"
+            files={videos}
+            thumbSize={thumbSize}
+            onOpen={(f) => api.arquivos.openFile(f.path)}
+            onContextMenu={(f, e) => setContextMenu({ file: f, x: e.clientX, y: e.clientY })}
+            onRemove={handleRemove}
+          />
         </div>
       ) : (
         <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Nenhum arquivo ainda.</p>
@@ -208,6 +178,84 @@ export function FileDropzone({ visitaRef }: Props) {
           >
             Remover
           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MediaColumn({
+  title,
+  files,
+  thumbSize,
+  onOpen,
+  onContextMenu,
+  onRemove,
+}: {
+  title: string;
+  files: FileEntry[];
+  thumbSize: number;
+  onOpen: (file: FileEntry) => void;
+  onContextMenu: (file: FileEntry, e: React.MouseEvent) => void;
+  onRemove: (fileName: string) => void;
+}) {
+  return (
+    <div className="p-3">
+      <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+        {title} ({files.length})
+      </h3>
+      {files.length === 0 ? (
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          {title === "Fotos" ? "Nenhuma foto ainda." : "Nenhum vídeo ainda."}
+        </p>
+      ) : (
+        <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbSize}px, 1fr))` }}>
+          {files.map((f) => (
+            <div
+              key={f.name}
+              onDoubleClick={() => onOpen(f)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onContextMenu(f, e);
+              }}
+              title={f.name}
+              className="group relative cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900"
+              style={{ aspectRatio: "1 / 1" }}
+            >
+              {isVideo(f.mimeType) ? (
+                <video src={toMediaUrl(f.path)} muted preload="metadata" className="h-full w-full object-cover" />
+              ) : (
+                <img src={toMediaUrl(f.path)} loading="lazy" className="h-full w-full object-cover" />
+              )}
+
+              {isVideo(f.mimeType) && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50">
+                    <svg viewBox="0 0 24 24" fill="white" className="ml-0.5 h-4 w-4">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 py-1 text-[11px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                {f.name} · {formatSize(f.sizeBytes)}
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(f.name);
+                }}
+                title="Remover"
+                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

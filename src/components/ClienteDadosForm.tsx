@@ -44,7 +44,10 @@ export function ClienteDadosForm({ empresa }: Props) {
   }
 
   function addPessoa() {
-    setForm((prev) => ({ ...prev, pessoas: [...prev.pessoas, { nome: "", contato: "" }] }));
+    setForm((prev) => ({
+      ...prev,
+      pessoas: [...prev.pessoas, { nome: "", contato: "", cargo: "", email: "" }],
+    }));
   }
 
   function removePessoa(index: number) {
@@ -110,34 +113,57 @@ export function ClienteDadosForm({ empresa }: Props) {
             {form.pessoas.map((pessoa, index) => (
               <div
                 key={index}
-                className="flex items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900"
+                className="relative rounded-lg border border-slate-200 bg-slate-50 p-3 pr-10 dark:border-slate-800 dark:bg-slate-900"
               >
-                <div className="flex-1">
-                  <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                    Nome
-                  </label>
-                  <input
-                    value={pessoa.nome}
-                    onChange={(e) => updatePessoa(index, "nome", e.target.value)}
-                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                    Contato
-                  </label>
-                  <input
-                    value={pessoa.contato}
-                    onChange={(e) => updatePessoa(index, "contato", e.target.value)}
-                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                  />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                      Nome
+                    </label>
+                    <input
+                      value={pessoa.nome}
+                      onChange={(e) => updatePessoa(index, "nome", e.target.value)}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                      Contato
+                    </label>
+                    <input
+                      value={pessoa.contato}
+                      onChange={(e) => updatePessoa(index, "contato", e.target.value)}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                      Cargo
+                    </label>
+                    <input
+                      value={pessoa.cargo}
+                      onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                      E-mail
+                    </label>
+                    <input
+                      type="email"
+                      value={pessoa.email}
+                      onChange={(e) => updatePessoa(index, "email", e.target.value)}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    />
+                  </div>
                 </div>
                 <button
                   onClick={() => removePessoa(index)}
                   title="Remover pessoa"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                  className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
                     <path d="M18 6 6 18M6 6l12 12" />
                   </svg>
                 </button>

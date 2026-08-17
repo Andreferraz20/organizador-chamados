@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import { EmptyHint } from "./EmptyHint";
 import type { ClienteDetalhes, ProblemaDetalhe } from "../types";
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 interface Props {
   empresa: string;
@@ -36,7 +41,9 @@ export function ClienteDetalhesForm({ empresa }: Props) {
   }
 
   function addProblema() {
-    setForm((prev) => ({ problemas: [...prev.problemas, { titulo: "", descricao: "" }] }));
+    setForm((prev) => ({
+      problemas: [...prev.problemas, { titulo: "", descricao: "", data: todayIso() }],
+    }));
   }
 
   function removeProblema(index: number) {
@@ -88,6 +95,12 @@ export function ClienteDetalhesForm({ empresa }: Props) {
                   placeholder="Título do problema"
                   className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 placeholder:font-normal placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
+                <input
+                  type="date"
+                  value={problema.data}
+                  onChange={(e) => updateProblema(index, "data", e.target.value)}
+                  className="w-40 shrink-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
                 <button
                   onClick={() => removeProblema(index)}
                   title="Remover detalhe"
@@ -98,7 +111,7 @@ export function ClienteDetalhesForm({ empresa }: Props) {
                   </svg>
                 </button>
               </div>
-              <textarea
+              <AutoGrowTextarea
                 value={problema.descricao}
                 onChange={(e) => updateProblema(index, "descricao", e.target.value)}
                 rows={4}

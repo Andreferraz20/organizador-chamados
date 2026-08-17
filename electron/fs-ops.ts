@@ -32,6 +32,8 @@ interface FileEntry {
 interface Pessoa {
   nome: string;
   contato: string;
+  cargo: string;
+  email: string;
 }
 
 interface ClienteDados {
@@ -43,6 +45,7 @@ interface ClienteDados {
 interface ProblemaDetalhe {
   titulo: string;
   descricao: string;
+  data: string;
 }
 
 interface ClienteDetalhes {

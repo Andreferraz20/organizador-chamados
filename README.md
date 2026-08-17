@@ -1,4 +1,4 @@
-# Organizador de Chamados
+# Área Técnica
 
 App desktop (Windows) para técnicos de manutenção organizarem localmente as informações
 de cada visita: fotos, vídeos e o laudo técnico. Não depende de internet, nuvem ou banco
@@ -51,7 +51,7 @@ Esse comando faz três coisas em sequência:
 2. Compila o app com o Vite (renderer + processo principal do Electron).
 3. Empacota tudo com o `electron-builder`, gerando o instalador Windows.
 
-O instalador final fica em `release/Organizador de Chamados Setup <versão>.exe`. Esse
+O instalador final fica em `release/Área Técnica Setup <versão>.exe`. Esse
 arquivo é autocontido — pode ser copiado para qualquer PC Windows e instalado sem
 precisar de Node.js ou de mais nada.
 

@@ -1,5 +1,5 @@
 appId: com.organizadorchamados.app
-productName: Organizador de Chamados
+productName: Área Técnica
 directories:
   output: release
 files:

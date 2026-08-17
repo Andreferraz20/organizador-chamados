@@ -27,7 +27,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: "Organizador de Chamados",
+    title: "Área Técnica",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -63,10 +63,14 @@ app.on("activate", () => {
 
 app.whenReady().then(() => {
   protocol.handle("media", (request) => {
-    // "media:///C%3A/Users/..." tem o mesmo formato de um "file://" URL — reaproveita o parser do Node.
-    const fileUrl = "file" + request.url.slice("media".length);
-    const filePath = fileURLToPath(fileUrl);
-    return net.fetch(pathToFileURL(filePath).toString());
+    try {
+      // O caminho vem no query param "path" (ver toMediaUrl em src/lib/api.ts).
+      const filePath = new URL(request.url).searchParams.get("path") ?? "";
+      return net.fetch(pathToFileURL(filePath).toString());
+    } catch (error) {
+      console.error("[media protocol]", request.url, error);
+      throw error;
+    }
   });
 
   registerFsHandlers();

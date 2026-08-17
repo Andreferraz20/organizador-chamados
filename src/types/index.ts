@@ -42,6 +42,8 @@ export interface FileEntry {
 export interface Pessoa {
   nome: string;
   contato: string;
+  cargo: string;
+  email: string;
 }
 
 export interface ClienteDados {
@@ -53,6 +55,7 @@ export interface ClienteDados {
 export interface ProblemaDetalhe {
   titulo: string;
   descricao: string;
+  data: string;
 }
 
 export interface ClienteDetalhes {

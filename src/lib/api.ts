@@ -43,12 +43,12 @@ export function suggestSigla(label: string): string {
   return normalized.slice(0, 14);
 }
 
-/** URL pro protocolo customizado "media://" que exibe previews de arquivos locais. */
+/**
+ * URL pro protocolo customizado "media://" que exibe previews de arquivos locais.
+ * O caminho vai inteiro num query param (não no path da URL) porque o parser de
+ * URL do Chromium não dá o mesmo tratamento de "host vazio" que dá pro file://,
+ * e acaba lendo o primeiro pedaço do caminho (ex: "C:") como host.
+ */
 export function toMediaUrl(filePath: string): string {
-  const encoded = filePath
-    .replace(/\\/g, "/")
-    .split("/")
-    .map(encodeURIComponent)
-    .join("/");
-  return `media:///${encoded}`;
+  return `media://local/?path=${encodeURIComponent(filePath)}`;
 }
