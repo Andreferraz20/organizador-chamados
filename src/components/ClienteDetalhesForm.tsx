@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "../lib/api";
+import { api, formatMesLabel } from "../lib/api";
 import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import { EmptyHint } from "./EmptyHint";
 import type { ClienteDetalhes, LaudoRef, VisitaRef } from "../types";
@@ -194,6 +194,11 @@ export function ClienteDetalhesForm({ empresa, onOpenVisita }: Props) {
   );
 }
 
+interface MesGroup {
+  mes: string;
+  visitas: { dia: string; tipoVisita: string }[];
+}
+
 function LaudoPicker({
   empresa,
   onSelect,
@@ -204,23 +209,22 @@ function LaudoPicker({
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(true);
-  const [visitas, setVisitas] = useState<LaudoRef[]>([]);
+  const [grupos, setGrupos] = useState<MesGroup[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     (async () => {
       const meses = await api.visitas.listMeses(empresa);
-      const all: LaudoRef[] = [];
-      for (const mes of meses) {
+      const ordenados = [...meses].sort((a, b) => b.localeCompare(a));
+      const result: MesGroup[] = [];
+      for (const mes of ordenados) {
         const doMes = await api.visitas.listVisitas(empresa, mes);
-        for (const v of doMes) {
-          all.push({ mes, dia: v.dia, tipoVisita: v.tipoVisita });
-        }
+        const visitas = [...doMes].sort((a, b) => b.dia.localeCompare(a.dia));
+        if (visitas.length > 0) result.push({ mes, visitas });
       }
       if (cancelled) return;
-      all.sort((a, b) => (a.mes + a.dia).localeCompare(b.mes + b.dia));
-      setVisitas(all);
+      setGrupos(result);
       setLoading(false);
     })();
     return () => {
@@ -235,18 +239,27 @@ function LaudoPicker({
 
         {loading ? (
           <p className="text-sm text-slate-400 dark:text-slate-500">Carregando…</p>
-        ) : visitas.length === 0 ? (
+        ) : grupos.length === 0 ? (
           <EmptyHint text="Nenhuma visita técnica registrada ainda." />
         ) : (
-          <div className="max-h-64 space-y-1 overflow-y-auto">
-            {visitas.map((v) => (
-              <button
-                key={`${v.mes}-${v.dia}-${v.tipoVisita}`}
-                onClick={() => onSelect(v)}
-                className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-              >
-                {v.dia}/{v.mes} — {v.tipoVisita}
-              </button>
+          <div className="max-h-72 space-y-3 overflow-y-auto">
+            {grupos.map((grupo) => (
+              <div key={grupo.mes}>
+                <p className="mb-1 px-1 text-xs font-semibold uppercase text-slate-400 dark:text-slate-500">
+                  {formatMesLabel(grupo.mes)}
+                </p>
+                <div className="space-y-1">
+                  {grupo.visitas.map((v) => (
+                    <button
+                      key={`${grupo.mes}-${v.dia}-${v.tipoVisita}`}
+                      onClick={() => onSelect({ mes: grupo.mes, dia: v.dia, tipoVisita: v.tipoVisita })}
+                      className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                    >
+                      Dia {v.dia} — {v.tipoVisita}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

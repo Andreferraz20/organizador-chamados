@@ -80,13 +80,17 @@ export default function App() {
       {route.name !== "menu" && <BackToMenuBar onClick={() => setRoute({ name: "menu" })} />}
 
       <div className="flex-1 overflow-y-auto">
-        {route.name === "menu" && <MainMenu onOpenAtendimentos={() => setRoute({ name: "home" })} />}
+        {route.name === "menu" && (
+          <MainMenu
+            onOpenAtendimentos={() => setRoute({ name: "home" })}
+            onOpenSettings={() => setRoute({ name: "settings" })}
+          />
+        )}
 
         {route.name === "home" && (
           <Home
             onBack={() => setRoute({ name: "menu" })}
             onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
-            onOpenSettings={() => setRoute({ name: "settings" })}
           />
         )}
 
@@ -109,7 +113,7 @@ export default function App() {
         )}
 
         {route.name === "settings" && (
-          <Settings onBack={() => setRoute({ name: "home" })} onSettingsChanged={setSettings} />
+          <Settings onBack={() => setRoute({ name: "menu" })} onSettingsChanged={setSettings} />
         )}
       </div>
     </div>

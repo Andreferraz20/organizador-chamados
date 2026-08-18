@@ -4,10 +4,9 @@ import { api } from "../lib/api";
 interface Props {
   onBack: () => void;
   onOpenCliente: (empresa: string) => void;
-  onOpenSettings: () => void;
 }
 
-export function Home({ onBack, onOpenCliente, onOpenSettings }: Props) {
+export function Home({ onBack, onOpenCliente }: Props) {
   const [rootFolder, setRootFolder] = useState<string | null | undefined>(undefined);
   const [empresas, setEmpresas] = useState<string[]>([]);
   const [novoNome, setNovoNome] = useState("");
@@ -54,14 +53,14 @@ export function Home({ onBack, onOpenCliente, onOpenSettings }: Props) {
       <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Configure a pasta raiz</h2>
         <p className="max-w-md text-sm text-slate-500 dark:text-slate-400">
-          Antes de começar, escolha em Ajustes a pasta no seu PC onde os chamados (empresas, fotos,
-          vídeos e laudos) serão guardados.
+          Antes de começar, escolha em Ajustes (engrenagem no Menu Principal) a pasta no seu PC onde
+          os chamados (empresas, fotos, vídeos e laudos) serão guardados.
         </p>
         <button
-          onClick={onOpenSettings}
+          onClick={onBack}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
-          Ir para Ajustes
+          Voltar ao Menu Principal
         </button>
       </div>
     );
@@ -76,19 +75,7 @@ export function Home({ onBack, onOpenCliente, onOpenSettings }: Props) {
         >
           ← Menu
         </button>
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Clientes</h1>
-          <button
-            onClick={onOpenSettings}
-            title="Ajustes"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          </button>
-        </div>
+        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Clientes</h1>
       </div>
 
       <div className="mb-6 flex gap-2">
