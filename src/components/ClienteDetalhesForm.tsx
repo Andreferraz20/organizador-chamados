@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import { EmptyHint } from "./EmptyHint";
-import type { ClienteDetalhes, ProblemaDetalhe } from "../types";
+import type { ClienteDetalhes, LaudoRef, VisitaRef } from "../types";
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -10,15 +10,17 @@ function todayIso(): string {
 
 interface Props {
   empresa: string;
+  onOpenVisita: (ref: VisitaRef) => void;
 }
 
 const EMPTY: ClienteDetalhes = { problemas: [] };
 
-export function ClienteDetalhesForm({ empresa }: Props) {
+export function ClienteDetalhesForm({ empresa, onOpenVisita }: Props) {
   const [form, setForm] = useState<ClienteDetalhes>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,16 +35,23 @@ export function ClienteDetalhesForm({ empresa }: Props) {
     };
   }, [empresa]);
 
-  function updateProblema(index: number, field: keyof ProblemaDetalhe, value: string) {
+  function updateProblema(index: number, field: "titulo" | "descricao" | "data", value: string) {
     setForm((prev) => ({
       problemas: prev.problemas.map((p, i) => (i === index ? { ...p, [field]: value } : p)),
     }));
     setSavedMessage(null);
   }
 
+  function setLaudoRef(index: number, laudoRef: LaudoRef | null) {
+    setForm((prev) => ({
+      problemas: prev.problemas.map((p, i) => (i === index ? { ...p, laudoRef } : p)),
+    }));
+    setSavedMessage(null);
+  }
+
   function addProblema() {
     setForm((prev) => ({
-      problemas: [...prev.problemas, { titulo: "", descricao: "", data: todayIso() }],
+      problemas: [...prev.problemas, { titulo: "", descricao: "", data: todayIso(), laudoRef: null }],
     }));
   }
 
@@ -118,6 +127,43 @@ export function ClienteDetalhesForm({ empresa }: Props) {
                 placeholder="Detalhes do problema"
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500"
               />
+
+              {problema.laudoRef ? (
+                <div className="flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs dark:border-blue-900 dark:bg-blue-950/40">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400">
+                    <path d="M21.44 11.05l-9.19 9.19a5 5 0 01-7.07-7.07l9.19-9.19a3 3 0 014.24 4.24l-9.2 9.19a1 1 0 01-1.41-1.41l8.49-8.48" />
+                  </svg>
+                  <button
+                    onClick={() =>
+                      onOpenVisita({
+                        empresa,
+                        mes: problema.laudoRef!.mes,
+                        dia: problema.laudoRef!.dia,
+                        tipoVisita: problema.laudoRef!.tipoVisita,
+                      })
+                    }
+                    className="flex-1 text-left text-blue-700 hover:underline dark:text-blue-300"
+                  >
+                    Anexado ao laudo de {problema.laudoRef.dia}/{problema.laudoRef.mes} — {problema.laudoRef.tipoVisita}
+                  </button>
+                  <button
+                    onClick={() => setLaudoRef(index, null)}
+                    title="Desanexar"
+                    className="shrink-0 text-blue-400 hover:text-red-600 dark:text-blue-500 dark:hover:text-red-400"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setPickerIndex(index)}
+                  className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  + Anexar laudo de uma visita
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -132,6 +178,87 @@ export function ClienteDetalhesForm({ empresa }: Props) {
           {saving ? "Salvando…" : "Salvar"}
         </button>
         {savedMessage && <span className="text-sm text-green-600 dark:text-green-400">{savedMessage}</span>}
+      </div>
+
+      {pickerIndex !== null && (
+        <LaudoPicker
+          empresa={empresa}
+          onSelect={(ref) => {
+            setLaudoRef(pickerIndex, ref);
+            setPickerIndex(null);
+          }}
+          onClose={() => setPickerIndex(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function LaudoPicker({
+  empresa,
+  onSelect,
+  onClose,
+}: {
+  empresa: string;
+  onSelect: (ref: LaudoRef) => void;
+  onClose: () => void;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [visitas, setVisitas] = useState<LaudoRef[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    (async () => {
+      const meses = await api.visitas.listMeses(empresa);
+      const all: LaudoRef[] = [];
+      for (const mes of meses) {
+        const doMes = await api.visitas.listVisitas(empresa, mes);
+        for (const v of doMes) {
+          all.push({ mes, dia: v.dia, tipoVisita: v.tipoVisita });
+        }
+      }
+      if (cancelled) return;
+      all.sort((a, b) => (a.mes + a.dia).localeCompare(b.mes + b.dia));
+      setVisitas(all);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [empresa]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+        <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Anexar laudo de uma visita</h3>
+
+        {loading ? (
+          <p className="text-sm text-slate-400 dark:text-slate-500">Carregando…</p>
+        ) : visitas.length === 0 ? (
+          <EmptyHint text="Nenhuma visita técnica registrada ainda." />
+        ) : (
+          <div className="max-h-64 space-y-1 overflow-y-auto">
+            {visitas.map((v) => (
+              <button
+                key={`${v.mes}-${v.dia}-${v.tipoVisita}`}
+                onClick={() => onSelect(v)}
+                className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                {v.dia}/{v.mes} — {v.tipoVisita}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={onClose}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          >
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   );

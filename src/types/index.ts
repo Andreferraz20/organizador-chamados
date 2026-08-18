@@ -52,10 +52,17 @@ export interface ClienteDados {
   pessoas: Pessoa[];
 }
 
+export interface LaudoRef {
+  mes: string;
+  dia: string;
+  tipoVisita: string;
+}
+
 export interface ProblemaDetalhe {
   titulo: string;
   descricao: string;
   data: string;
+  laudoRef?: LaudoRef | null;
 }
 
 export interface ClienteDetalhes {

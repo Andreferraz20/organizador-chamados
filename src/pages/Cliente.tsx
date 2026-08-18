@@ -53,7 +53,7 @@ export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRename
 
       <div className="flex-1 overflow-y-auto">
         {tab === "dados" && <ClienteDadosForm empresa={empresa} onRenamed={onRenamed} />}
-        {tab === "detalhes" && <ClienteDetalhesForm empresa={empresa} />}
+        {tab === "detalhes" && <ClienteDetalhesForm empresa={empresa} onOpenVisita={onOpenVisita} />}
         {tab === "visitas" && (
           <VisitasTecnicas empresa={empresa} tiposDeVisita={tiposDeVisita} onOpenVisita={onOpenVisita} />
         )}

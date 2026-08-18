@@ -10,6 +10,8 @@ export function MainMenu({ onOpenAtendimentos }: Props) {
         <MenuOption label="Atendimentos" onClick={onOpenAtendimentos} />
         <MenuOption label="Estoque Técnico" comingSoon />
         <MenuOption label="Pedido de Ferramentas" comingSoon />
+        <MenuOption label="Documentação" comingSoon />
+        <MenuOption label="Códigos de Erro" comingSoon />
       </div>
     </div>
   );

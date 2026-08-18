@@ -42,10 +42,17 @@ interface ClienteDados {
   pessoas: Pessoa[];
 }
 
+interface LaudoRef {
+  mes: string;
+  dia: string;
+  tipoVisita: string;
+}
+
 interface ProblemaDetalhe {
   titulo: string;
   descricao: string;
   data: string;
+  laudoRef?: LaudoRef | null;
 }
 
 interface ClienteDetalhes {

@@ -15,6 +15,19 @@ type Route =
   | { name: "visita"; ref: VisitaRef }
   | { name: "settings" };
 
+function BackToMenuBar({ onClick }: { onClick: () => void }) {
+  return (
+    <div className="flex shrink-0 justify-end border-b border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
+      <button
+        onClick={onClick}
+        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+      >
+        Voltar ao Menu Principal
+      </button>
+    </div>
+  );
+}
+
 function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: () => void }) {
   return (
     <button
@@ -61,40 +74,44 @@ export default function App() {
   const acompanhantePadrao = [settings?.tecnicoNome, settings?.tecnicoEmpresa].filter(Boolean).join(" - ");
 
   return (
-    <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
       <ThemeToggle theme={theme} onToggle={toggle} />
 
-      {route.name === "menu" && <MainMenu onOpenAtendimentos={() => setRoute({ name: "home" })} />}
+      {route.name !== "menu" && <BackToMenuBar onClick={() => setRoute({ name: "menu" })} />}
 
-      {route.name === "home" && (
-        <Home
-          onBack={() => setRoute({ name: "menu" })}
-          onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
-          onOpenSettings={() => setRoute({ name: "settings" })}
-        />
-      )}
+      <div className="flex-1 overflow-y-auto">
+        {route.name === "menu" && <MainMenu onOpenAtendimentos={() => setRoute({ name: "home" })} />}
 
-      {route.name === "cliente" && (
-        <Cliente
-          empresa={route.empresa}
-          tiposDeVisita={tiposDeVisita}
-          onBack={() => setRoute({ name: "home" })}
-          onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
-          onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
-        />
-      )}
+        {route.name === "home" && (
+          <Home
+            onBack={() => setRoute({ name: "menu" })}
+            onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
+            onOpenSettings={() => setRoute({ name: "settings" })}
+          />
+        )}
 
-      {route.name === "visita" && (
-        <Visita
-          visitaRef={route.ref}
-          acompanhantePadrao={acompanhantePadrao}
-          onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
-        />
-      )}
+        {route.name === "cliente" && (
+          <Cliente
+            empresa={route.empresa}
+            tiposDeVisita={tiposDeVisita}
+            onBack={() => setRoute({ name: "home" })}
+            onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+            onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
+          />
+        )}
 
-      {route.name === "settings" && (
-        <Settings onBack={() => setRoute({ name: "home" })} onSettingsChanged={setSettings} />
-      )}
+        {route.name === "visita" && (
+          <Visita
+            visitaRef={route.ref}
+            acompanhantePadrao={acompanhantePadrao}
+            onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
+          />
+        )}
+
+        {route.name === "settings" && (
+          <Settings onBack={() => setRoute({ name: "home" })} onSettingsChanged={setSettings} />
+        )}
+      </div>
     </div>
   );
 }
