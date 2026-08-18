@@ -1,10 +1,14 @@
-import { app, BrowserWindow, net, protocol } from "electron";
+import { app, BrowserWindow, Menu, net, protocol } from "electron";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { registerFsHandlers, registerMediaContextMenu } from "./fs-ops";
 import { registerPdfHandlers } from "./pdf";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Remove a barra de menu padrão do Electron (File/Edit/View/Window) — não faz
+// sentido pro usuário final deste app.
+Menu.setApplicationMenu(null);
 
 /** Protocolo customizado pra exibir previews de fotos/vídeos locais sem os bloqueios de "file://". */
 protocol.registerSchemesAsPrivileged([
