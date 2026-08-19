@@ -283,10 +283,23 @@ export function registerFsHandlers(): void {
     const oldPath = path.join(root, sanitizeName(oldNome));
     const newPath = path.join(root, safeNewName);
     if (oldPath === newPath) return safeNewName;
-    if (fsSync.existsSync(newPath)) {
+
+    // No Windows o sistema de arquivos não diferencia maiúsculas de minúsculas, então uma
+    // mudança só de caixa (ex: "Vivaz" -> "VIVAZ") aponta pra essa mesma pasta — não é conflito.
+    const isCaseOnlyChange = oldPath.toLowerCase() === newPath.toLowerCase();
+    if (!isCaseOnlyChange && fsSync.existsSync(newPath)) {
       throw new Error(`Já existe um cliente chamado "${safeNewName}".`);
     }
-    await fs.rename(oldPath, newPath);
+
+    if (isCaseOnlyChange) {
+      // Um rename direto só de caixa nem sempre "pega" no Windows — passa por um nome
+      // temporário no meio do caminho pra garantir que a troca aconteça de verdade.
+      const tempPath = `${oldPath}__rename_tmp_${Date.now()}`;
+      await fs.rename(oldPath, tempPath);
+      await fs.rename(tempPath, newPath);
+    } else {
+      await fs.rename(oldPath, newPath);
+    }
     return safeNewName;
   });
 
