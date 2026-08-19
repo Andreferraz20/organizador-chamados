@@ -114,33 +114,35 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
 
   return (
     <div className="max-w-5xl space-y-6">
-      <div className="max-w-2xl">
-        <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-          Nome do Cliente
-        </label>
-        <input
-          value={form.nome}
-          onChange={(e) => update("nome", e.target.value)}
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-        />
-        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-          Ao salvar com um nome diferente, a pasta do cliente é renomeada junto.
-        </p>
+      <div className="max-w-md space-y-4">
+        <div>
+          <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            Nome do Cliente
+          </label>
+          <input
+            value={form.nome}
+            onChange={(e) => update("nome", e.target.value)}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          />
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            Ao salvar com um nome diferente, a pasta do cliente é renomeada junto.
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            Endereço
+          </label>
+          <input
+            value={form.endereco}
+            onChange={(e) => update("endereco", e.target.value)}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 divide-x divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
         <div className="space-y-6 p-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-              Endereço
-            </label>
-            <input
-              value={form.endereco}
-              onChange={(e) => update("endereco", e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-          </div>
-
           <div>
             <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
               Quantidade de Bocas
@@ -151,7 +153,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
               inputMode="numeric"
               value={form.quantidadeBocas}
               onChange={(e) => update("quantidadeBocas", e.target.value)}
-              className="w-32 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="w-20 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
