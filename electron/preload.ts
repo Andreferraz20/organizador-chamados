@@ -10,6 +10,15 @@ contextBridge.exposeInMainWorld("app", {
     list: () => ipcRenderer.invoke("empresas:list"),
     create: (nome: string) => ipcRenderer.invoke("empresas:create", nome),
     delete: (nome: string) => ipcRenderer.invoke("empresas:delete", nome),
+    rename: (oldNome: string, newNome: string) => ipcRenderer.invoke("empresas:rename", oldNome, newNome),
+  },
+  clienteDados: {
+    get: (empresa: string) => ipcRenderer.invoke("clienteDados:get", empresa),
+    save: (empresa: string, dados: unknown) => ipcRenderer.invoke("clienteDados:save", empresa, dados),
+  },
+  clienteDetalhes: {
+    get: (empresa: string) => ipcRenderer.invoke("clienteDetalhes:get", empresa),
+    save: (empresa: string, detalhes: unknown) => ipcRenderer.invoke("clienteDetalhes:save", empresa, detalhes),
   },
   visitas: {
     listMeses: (empresa: string) => ipcRenderer.invoke("visitas:listMeses", empresa),
@@ -22,13 +31,28 @@ contextBridge.exposeInMainWorld("app", {
     pickFiles: () => ipcRenderer.invoke("arquivos:pickFiles"),
     add: (ref: unknown, sourcePaths: string[]) => ipcRenderer.invoke("arquivos:add", ref, sourcePaths),
     remove: (ref: unknown, fileName: string) => ipcRenderer.invoke("arquivos:remove", ref, fileName),
+    rename: (ref: unknown, oldName: string, newName: string) =>
+      ipcRenderer.invoke("arquivos:rename", ref, oldName, newName),
     openInExplorer: (ref: unknown) => ipcRenderer.invoke("arquivos:openInExplorer", ref),
     openFile: (filePath: string) => ipcRenderer.invoke("arquivos:openFile", filePath),
     showInFolder: (filePath: string) => ipcRenderer.invoke("arquivos:showInFolder", filePath),
+    startDrag: (filePaths: string[]) => ipcRenderer.send("arquivos:startDrag", filePaths),
   },
   laudo: {
     get: (ref: unknown) => ipcRenderer.invoke("laudo:get", ref),
     save: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:save", ref, data),
     generate: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:generate", ref, data),
+  },
+  media: {
+    onRename: (callback: (filePath: string) => void) => {
+      const listener = (_event: unknown, filePath: string) => callback(filePath);
+      ipcRenderer.on("media:rename", listener);
+      return () => ipcRenderer.removeListener("media:rename", listener);
+    },
+    onRefresh: (callback: () => void) => {
+      const listener = () => callback();
+      ipcRenderer.on("media:refresh", listener);
+      return () => ipcRenderer.removeListener("media:refresh", listener);
+    },
   },
 });

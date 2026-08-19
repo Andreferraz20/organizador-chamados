@@ -19,14 +19,22 @@ export function partsToDate(mes: string, dia: string): string {
   return `${mes}-${dia}`;
 }
 
+const NOMES_MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
 export function formatMesLabel(mes: string): string {
   const [ano, mesNum] = mes.split("-");
-  const meses = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
-  ];
   const index = Number(mesNum) - 1;
-  return `${meses[index] ?? mesNum} ${ano}`;
+  return `${NOMES_MESES[index] ?? mesNum} ${ano}`;
+}
+
+/** Só o nome do mês, sem o ano (pra quando o ano já aparece como cabeçalho do grupo). */
+export function formatMesNomeOnly(mes: string): string {
+  const [, mesNum] = mes.split("-");
+  const index = Number(mesNum) - 1;
+  return NOMES_MESES[index] ?? mesNum;
 }
 
 export function visitaLabel(ref: VisitaRef): string {
@@ -43,12 +51,12 @@ export function suggestSigla(label: string): string {
   return normalized.slice(0, 14);
 }
 
-/** URL pro protocolo customizado "media://" que exibe previews de arquivos locais. */
+/**
+ * URL pro protocolo customizado "media://" que exibe previews de arquivos locais.
+ * O caminho vai inteiro num query param (não no path da URL) porque o parser de
+ * URL do Chromium não dá o mesmo tratamento de "host vazio" que dá pro file://,
+ * e acaba lendo o primeiro pedaço do caminho (ex: "C:") como host.
+ */
 export function toMediaUrl(filePath: string): string {
-  const encoded = filePath
-    .replace(/\\/g, "/")
-    .split("/")
-    .map(encodeURIComponent)
-    .join("/");
-  return `media:///${encoded}`;
+  return `media://local/?path=${encodeURIComponent(filePath)}`;
 }

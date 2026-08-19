@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { api, dateToParts, formatMesLabel, todayParts } from "../lib/api";
+import { EmptyHint } from "./EmptyHint";
 import type { VisitaRef } from "../types";
 
 interface Props {
   empresa: string;
   tiposDeVisita: string[];
-  autoAbrirForm?: boolean;
-  onBack: () => void;
   onOpenVisita: (ref: VisitaRef) => void;
 }
 
@@ -15,12 +14,12 @@ interface VisitaResumo {
   tipoVisita: string;
 }
 
-export function Empresa({ empresa, tiposDeVisita, autoAbrirForm, onBack, onOpenVisita }: Props) {
+export function VisitasTecnicas({ empresa, tiposDeVisita, onOpenVisita }: Props) {
   const [meses, setMeses] = useState<string[]>([]);
   const [selectedMes, setSelectedMes] = useState<string | null>(null);
   const [visitas, setVisitas] = useState<VisitaResumo[]>([]);
 
-  const [showForm, setShowForm] = useState(Boolean(autoAbrirForm));
+  const [showForm, setShowForm] = useState(false);
   const [novaData, setNovaData] = useState(() => {
     const { mes, dia } = todayParts();
     return `${mes}-${dia}`;
@@ -54,17 +53,8 @@ export function Empresa({ empresa, tiposDeVisita, autoAbrirForm, onBack, onOpenV
   }
 
   return (
-    <div className="flex h-full flex-col p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <button
-            onClick={onBack}
-            className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            ← Empresas
-          </button>
-          <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">{empresa}</h1>
-        </div>
+    <div className="flex h-full flex-col">
+      <div className="mb-6 flex items-center justify-end">
         <button
           onClick={() => setShowForm((v) => !v)}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -169,8 +159,4 @@ function ColumnItem({
       {children}
     </button>
   );
-}
-
-function EmptyHint({ text }: { text: string }) {
-  return <p className="px-3 py-2 text-xs text-slate-400 dark:text-slate-500">{text}</p>;
 }

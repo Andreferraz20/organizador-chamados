@@ -1,10 +1,14 @@
-import { app, BrowserWindow, net, protocol } from "electron";
+import { app, BrowserWindow, Menu, net, protocol } from "electron";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { registerFsHandlers } from "./fs-ops";
+import { registerFsHandlers, registerMediaContextMenu } from "./fs-ops";
 import { registerPdfHandlers } from "./pdf";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Remove a barra de menu padrão do Electron (File/Edit/View/Window) — não faz
+// sentido pro usuário final deste app.
+Menu.setApplicationMenu(null);
 
 /** Protocolo customizado pra exibir previews de fotos/vídeos locais sem os bloqueios de "file://". */
 protocol.registerSchemesAsPrivileged([
@@ -27,7 +31,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: "Organizador de Chamados",
+    title: "Área do Técnico",
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -39,6 +43,8 @@ function createWindow() {
   win.webContents.on("preload-error", (_event, preloadPath, error) => {
     console.error("[preload-error]", preloadPath, error);
   });
+
+  registerMediaContextMenu(win);
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
@@ -63,10 +69,14 @@ app.on("activate", () => {
 
 app.whenReady().then(() => {
   protocol.handle("media", (request) => {
-    // "media:///C%3A/Users/..." tem o mesmo formato de um "file://" URL — reaproveita o parser do Node.
-    const fileUrl = "file" + request.url.slice("media".length);
-    const filePath = fileURLToPath(fileUrl);
-    return net.fetch(pathToFileURL(filePath).toString());
+    try {
+      // O caminho vem no query param "path" (ver toMediaUrl em src/lib/api.ts).
+      const filePath = new URL(request.url).searchParams.get("path") ?? "";
+      return net.fetch(pathToFileURL(filePath).toString());
+    } catch (error) {
+      console.error("[media protocol]", request.url, error);
+      throw error;
+    }
   });
 
   registerFsHandlers();

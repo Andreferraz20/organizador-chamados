@@ -1,17 +1,34 @@
 import { useEffect, useState } from "react";
 import { api } from "./lib/api";
 import { useTheme } from "./lib/theme";
+import { MainMenu } from "./pages/MainMenu";
 import { Home } from "./pages/Home";
-import { Empresa } from "./pages/Empresa";
+import { Cliente } from "./pages/Cliente";
 import { Visita } from "./pages/Visita";
 import { Settings } from "./pages/Settings";
 import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
+  | { name: "menu" }
   | { name: "home" }
-  | { name: "empresa"; empresa: string; autoAbrirForm?: boolean }
+  | { name: "cliente"; empresa: string }
   | { name: "visita"; ref: VisitaRef }
   | { name: "settings" };
+
+function BackToMenuButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Voltar ao Menu Principal"
+      className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+        <path d="M3 12 12 3l9 9" />
+        <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+      </svg>
+    </button>
+  );
+}
 
 function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: () => void }) {
   return (
@@ -35,7 +52,7 @@ function ThemeToggle({ theme, onToggle }: { theme: "light" | "dark"; onToggle: (
 }
 
 export default function App() {
-  const [route, setRoute] = useState<Route>({ name: "home" });
+  const [route, setRoute] = useState<Route>({ name: "menu" });
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const { theme, toggle } = useTheme();
 
@@ -62,20 +79,29 @@ export default function App() {
     <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
       <ThemeToggle theme={theme} onToggle={toggle} />
 
-      {route.name === "home" && (
-        <Home
-          onOpenEmpresa={(empresa, autoAbrirForm) => setRoute({ name: "empresa", empresa, autoAbrirForm })}
+      {route.name !== "menu" && <BackToMenuButton onClick={() => setRoute({ name: "menu" })} />}
+
+      {route.name === "menu" && (
+        <MainMenu
+          onOpenAtendimentos={() => setRoute({ name: "home" })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />
       )}
 
-      {route.name === "empresa" && (
-        <Empresa
+      {route.name === "home" && (
+        <Home
+          onBack={() => setRoute({ name: "menu" })}
+          onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
+        />
+      )}
+
+      {route.name === "cliente" && (
+        <Cliente
           empresa={route.empresa}
           tiposDeVisita={tiposDeVisita}
-          autoAbrirForm={route.autoAbrirForm}
           onBack={() => setRoute({ name: "home" })}
           onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+          onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
         />
       )}
 
@@ -83,12 +109,12 @@ export default function App() {
         <Visita
           visitaRef={route.ref}
           acompanhantePadrao={acompanhantePadrao}
-          onBack={() => setRoute({ name: "empresa", empresa: route.ref.empresa })}
+          onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
         />
       )}
 
       {route.name === "settings" && (
-        <Settings onBack={() => setRoute({ name: "home" })} onSettingsChanged={setSettings} />
+        <Settings onBack={() => setRoute({ name: "menu" })} onSettingsChanged={setSettings} />
       )}
     </div>
   );

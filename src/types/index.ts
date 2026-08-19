@@ -39,6 +39,43 @@ export interface FileEntry {
   mimeType: string;
 }
 
+export interface Pessoa {
+  nome: string;
+  contato: string;
+  cargo: string;
+  email: string;
+}
+
+export interface NumeroSerie {
+  numero: string;
+  tipoMaquina: string;
+}
+
+export interface ClienteDados {
+  nome: string;
+  endereco: string;
+  quantidadeBocas: string;
+  numerosSerie: NumeroSerie[];
+  pessoas: Pessoa[];
+}
+
+export interface LaudoRef {
+  mes: string;
+  dia: string;
+  tipoVisita: string;
+}
+
+export interface ProblemaDetalhe {
+  titulo: string;
+  descricao: string;
+  data: string;
+  laudoRef?: LaudoRef | null;
+}
+
+export interface ClienteDetalhes {
+  problemas: ProblemaDetalhe[];
+}
+
 export interface AppApi {
   settings: {
     get(): Promise<AppSettings>;
@@ -49,6 +86,15 @@ export interface AppApi {
     list(): Promise<string[]>;
     create(nome: string): Promise<void>;
     delete(nome: string): Promise<boolean>;
+    rename(oldNome: string, newNome: string): Promise<string>;
+  };
+  clienteDados: {
+    get(empresa: string): Promise<ClienteDados | null>;
+    save(empresa: string, dados: ClienteDados): Promise<void>;
+  };
+  clienteDetalhes: {
+    get(empresa: string): Promise<ClienteDetalhes | null>;
+    save(empresa: string, detalhes: ClienteDetalhes): Promise<void>;
   };
   visitas: {
     listMeses(empresa: string): Promise<string[]>;
@@ -61,14 +107,20 @@ export interface AppApi {
     pickFiles(): Promise<string[]>;
     add(ref: VisitaRef, sourcePaths: string[]): Promise<FileEntry[]>;
     remove(ref: VisitaRef, fileName: string): Promise<void>;
+    rename(ref: VisitaRef, oldName: string, newName: string): Promise<void>;
     openInExplorer(ref: VisitaRef): Promise<void>;
     openFile(filePath: string): Promise<void>;
     showInFolder(filePath: string): Promise<void>;
+    startDrag(filePaths: string[]): void;
   };
   laudo: {
     get(ref: VisitaRef): Promise<LaudoData | null>;
     save(ref: VisitaRef, data: LaudoData): Promise<void>;
     generate(ref: VisitaRef, data: LaudoData): Promise<string>;
+  };
+  media: {
+    onRename(callback: (filePath: string) => void): () => void;
+    onRefresh(callback: () => void): () => void;
   };
 }
 

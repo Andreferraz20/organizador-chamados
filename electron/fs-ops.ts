@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, nativeImage, shell } from "electron";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
@@ -29,6 +29,43 @@ interface FileEntry {
   mimeType: string;
 }
 
+interface Pessoa {
+  nome: string;
+  contato: string;
+  cargo: string;
+  email: string;
+}
+
+interface NumeroSerie {
+  numero: string;
+  tipoMaquina: string;
+}
+
+interface ClienteDados {
+  nome: string;
+  endereco: string;
+  quantidadeBocas: string;
+  numerosSerie: NumeroSerie[];
+  pessoas: Pessoa[];
+}
+
+interface LaudoRef {
+  mes: string;
+  dia: string;
+  tipoVisita: string;
+}
+
+interface ProblemaDetalhe {
+  titulo: string;
+  descricao: string;
+  data: string;
+  laudoRef?: LaudoRef | null;
+}
+
+interface ClienteDetalhes {
+  problemas: ProblemaDetalhe[];
+}
+
 const DEFAULT_SETTINGS: AppSettings = {
   rootFolder: null,
   tiposDeVisita: [
@@ -43,6 +80,19 @@ const DEFAULT_SETTINGS: AppSettings = {
 const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".heic", ".webp", ".gif"];
 const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".mkv", ".webm"];
 const MIDIA_DIR = "fotos-videos";
+
+/** Ícone cinza sólido usado no arraste nativo quando o arquivo (ex: vídeo) não dá pra virar thumbnail. */
+function createFallbackDragIcon() {
+  const size = 32;
+  const buffer = Buffer.alloc(size * size * 4);
+  for (let i = 0; i < buffer.length; i += 4) {
+    buffer[i] = 148; // B
+    buffer[i + 1] = 148; // G
+    buffer[i + 2] = 148; // R
+    buffer[i + 3] = 255; // A
+  }
+  return nativeImage.createFromBuffer(buffer, { width: size, height: size });
+}
 
 /** Gera uma sigla a partir de um nome livre, quando não há sigla configurada. */
 function fallbackSigla(tipo: string): string {
@@ -152,6 +202,14 @@ function visitaPath(root: string, ref: VisitaRef, tiposConfig: TipoVisitaConfig[
   return path.join(root, sanitizeName(ref.empresa), ref.mes, visitaFolderName(ref, tiposConfig));
 }
 
+function clienteDadosPath(root: string, empresa: string): string {
+  return path.join(root, sanitizeName(empresa), "cliente-dados.json");
+}
+
+function clienteDetalhesPath(root: string, empresa: string): string {
+  return path.join(root, sanitizeName(empresa), "cliente-detalhes.json");
+}
+
 function mimeTypeFor(fileName: string): string {
   const ext = path.extname(fileName).toLowerCase();
   if (IMAGE_EXTENSIONS.includes(ext)) return `image/${ext.slice(1)}`;
@@ -210,12 +268,60 @@ export function registerFsHandlers(): void {
       buttons: ["Cancelar", "Excluir"],
       defaultId: 0,
       cancelId: 0,
-      message: `Excluir a empresa "${nome}"?`,
-      detail: "Isso apaga todas as visitas, fotos, vídeos e laudos dessa empresa. Não é possível desfazer.",
+      message: `Excluir o cliente "${nome}"?`,
+      detail: "Isso apaga todos os dados, visitas, fotos, vídeos e laudos desse cliente. Não é possível desfazer.",
     });
     if (response !== 1) return false;
     await fs.rm(target, { recursive: true, force: true });
     return true;
+  });
+
+  ipcMain.handle("empresas:rename", async (_event, oldNome: string, newNome: string) => {
+    const root = await ensureRootFolder();
+    const safeNewName = sanitizeName(newNome);
+    if (!safeNewName) throw new Error("Nome inválido.");
+    const oldPath = path.join(root, sanitizeName(oldNome));
+    const newPath = path.join(root, safeNewName);
+    if (oldPath === newPath) return safeNewName;
+    if (fsSync.existsSync(newPath)) {
+      throw new Error(`Já existe um cliente chamado "${safeNewName}".`);
+    }
+    await fs.rename(oldPath, newPath);
+    return safeNewName;
+  });
+
+  ipcMain.handle("clienteDados:get", async (_event, empresa: string) => {
+    const root = await ensureRootFolder();
+    try {
+      const raw = await fs.readFile(clienteDadosPath(root, empresa), "utf-8");
+      return JSON.parse(raw) as ClienteDados;
+    } catch {
+      return null;
+    }
+  });
+
+  ipcMain.handle("clienteDados:save", async (_event, empresa: string, dados: ClienteDados) => {
+    const root = await ensureRootFolder();
+    const target = clienteDadosPath(root, empresa);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, JSON.stringify(dados, null, 2), "utf-8");
+  });
+
+  ipcMain.handle("clienteDetalhes:get", async (_event, empresa: string) => {
+    const root = await ensureRootFolder();
+    try {
+      const raw = await fs.readFile(clienteDetalhesPath(root, empresa), "utf-8");
+      return JSON.parse(raw) as ClienteDetalhes;
+    } catch {
+      return null;
+    }
+  });
+
+  ipcMain.handle("clienteDetalhes:save", async (_event, empresa: string, detalhes: ClienteDetalhes) => {
+    const root = await ensureRootFolder();
+    const target = clienteDetalhesPath(root, empresa);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, JSON.stringify(detalhes, null, 2), "utf-8");
   });
 
   ipcMain.handle("visitas:listMeses", async (_event, empresa: string) => {
@@ -292,6 +398,21 @@ export function registerFsHandlers(): void {
     await fs.unlink(filePath);
   });
 
+  ipcMain.handle("arquivos:rename", async (_event, ref: VisitaRef, oldName: string, newName: string) => {
+    const { root, tiposDeVisita } = await ensureContext();
+    const dir = path.join(visitaPath(root, ref, tiposDeVisita), MIDIA_DIR);
+    await fs.rename(path.join(dir, oldName), path.join(dir, sanitizeName(newName)));
+  });
+
+  ipcMain.on("arquivos:startDrag", (event, filePaths: string[]) => {
+    if (filePaths.length === 0) return;
+    let icon = nativeImage.createFromPath(filePaths[0]).resize({ width: 64, height: 64 });
+    if (icon.isEmpty()) {
+      icon = createFallbackDragIcon();
+    }
+    event.sender.startDrag({ file: filePaths[0], files: filePaths, icon });
+  });
+
   ipcMain.handle("arquivos:openInExplorer", async (_event, ref: VisitaRef) => {
     const { root, tiposDeVisita } = await ensureContext();
     const target = visitaPath(root, ref, tiposDeVisita);
@@ -317,6 +438,43 @@ export function registerFsHandlers(): void {
     const laudoDir = path.join(visitaPath(root, ref, tiposDeVisita), "laudo");
     await fs.mkdir(laudoDir, { recursive: true });
     await fs.writeFile(path.join(laudoDir, "laudo.json"), JSON.stringify(data, null, 2), "utf-8");
+  });
+}
+
+/**
+ * Menu de contexto nativo do Electron pras miniaturas de foto/vídeo.
+ *
+ * Usa webContents "context-menu" (nível do processo principal) em vez do evento
+ * "contextmenu" do DOM: em alguns setups o clique direito de verdade não estava
+ * disparando o evento do DOM (só funcionava disparando via JS manualmente), então
+ * um menu nativo — que não depende desse pipeline de eventos da página — é mais robusto.
+ */
+export function registerMediaContextMenu(win: BrowserWindow): void {
+  win.webContents.on("context-menu", (_event, params) => {
+    if (params.mediaType !== "image" && params.mediaType !== "video") return;
+
+    let filePath: string;
+    try {
+      filePath = new URL(params.srcURL).searchParams.get("path") ?? "";
+    } catch {
+      return;
+    }
+    if (!filePath) return;
+
+    const menu = Menu.buildFromTemplate([
+      { label: "Abrir", click: () => shell.openPath(filePath) },
+      { label: "Renomear", click: () => win.webContents.send("media:rename", filePath) },
+      { label: "Abrir local do arquivo", click: () => shell.showItemInFolder(filePath) },
+      { type: "separator" },
+      {
+        label: "Remover",
+        click: async () => {
+          await fs.unlink(filePath);
+          win.webContents.send("media:refresh");
+        },
+      },
+    ]);
+    menu.popup({ window: win });
   });
 }
 
