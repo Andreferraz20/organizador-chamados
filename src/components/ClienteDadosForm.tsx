@@ -148,12 +148,12 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
               Quantidade de Bocas
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               value={form.quantidadeBocas}
-              onChange={(e) => update("quantidadeBocas", e.target.value)}
-              className="w-20 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              onChange={(e) => update("quantidadeBocas", e.target.value.replace(/\D/g, ""))}
+              className="w-12 rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
 
