@@ -36,9 +36,16 @@ interface Pessoa {
   email: string;
 }
 
+interface NumeroSerie {
+  numero: string;
+  tipoMaquina: string;
+}
+
 interface ClienteDados {
   nome: string;
   endereco: string;
+  quantidadeBocas: string;
+  numerosSerie: NumeroSerie[];
   pessoas: Pessoa[];
 }
 

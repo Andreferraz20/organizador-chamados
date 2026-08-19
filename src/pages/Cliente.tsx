@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ClienteDadosForm } from "../components/ClienteDadosForm";
 import { ClienteDetalhesForm } from "../components/ClienteDetalhesForm";
 import { VisitasTecnicas } from "../components/VisitasTecnicas";
+import { VisitasRecorrencia } from "../components/VisitasRecorrencia";
 import type { VisitaRef } from "../types";
 
 interface Props {
@@ -12,12 +13,13 @@ interface Props {
   onRenamed: (newEmpresa: string) => void;
 }
 
-type Tab = "dados" | "detalhes" | "visitas";
+type Tab = "dados" | "detalhes" | "visitas" | "recorrencia";
 
 const TABS: [Tab, string][] = [
   ["dados", "Dados do Cliente"],
   ["detalhes", "Detalhes do Cliente"],
   ["visitas", "Visitas Técnicas"],
+  ["recorrencia", "Recorrência de Visitas"],
 ];
 
 export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRenamed }: Props) {
@@ -57,6 +59,7 @@ export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRename
         {tab === "visitas" && (
           <VisitasTecnicas empresa={empresa} tiposDeVisita={tiposDeVisita} onOpenVisita={onOpenVisita} />
         )}
+        {tab === "recorrencia" && <VisitasRecorrencia empresa={empresa} tiposDeVisita={tiposDeVisita} />}
       </div>
     </div>
   );

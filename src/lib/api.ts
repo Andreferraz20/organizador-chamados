@@ -19,14 +19,22 @@ export function partsToDate(mes: string, dia: string): string {
   return `${mes}-${dia}`;
 }
 
+const NOMES_MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
 export function formatMesLabel(mes: string): string {
   const [ano, mesNum] = mes.split("-");
-  const meses = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
-  ];
   const index = Number(mesNum) - 1;
-  return `${meses[index] ?? mesNum} ${ano}`;
+  return `${NOMES_MESES[index] ?? mesNum} ${ano}`;
+}
+
+/** Só o nome do mês, sem o ano (pra quando o ano já aparece como cabeçalho do grupo). */
+export function formatMesNomeOnly(mes: string): string {
+  const [, mesNum] = mes.split("-");
+  const index = Number(mesNum) - 1;
+  return NOMES_MESES[index] ?? mesNum;
 }
 
 export function visitaLabel(ref: VisitaRef): string {

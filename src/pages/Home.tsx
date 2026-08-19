@@ -75,7 +75,7 @@ export function Home({ onBack, onOpenCliente }: Props) {
         >
           ← Menu
         </button>
-        <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Clientes</h1>
+        <h1 className="text-xl font-semibold uppercase tracking-wide text-slate-800 dark:text-slate-100">Clientes</h1>
       </div>
 
       <div className="mb-6 flex gap-2">

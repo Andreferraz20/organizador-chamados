@@ -46,9 +46,16 @@ export interface Pessoa {
   email: string;
 }
 
+export interface NumeroSerie {
+  numero: string;
+  tipoMaquina: string;
+}
+
 export interface ClienteDados {
   nome: string;
   endereco: string;
+  quantidadeBocas: string;
+  numerosSerie: NumeroSerie[];
   pessoas: Pessoa[];
 }
 

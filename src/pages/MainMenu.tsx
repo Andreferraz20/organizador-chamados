@@ -45,7 +45,7 @@ function MenuOption({ label, onClick, comingSoon }: { label: string; onClick?: (
           : "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-blue-400 hover:bg-blue-50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-slate-800"
       }`}
     >
-      <span>{label}</span>
+      <span className="uppercase tracking-wide">{label}</span>
       {comingSoon && <span className="text-xs font-normal uppercase tracking-wide">Em breve</span>}
     </button>
   );

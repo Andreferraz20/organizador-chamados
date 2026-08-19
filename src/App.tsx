@@ -15,16 +15,18 @@ type Route =
   | { name: "visita"; ref: VisitaRef }
   | { name: "settings" };
 
-function BackToMenuBar({ onClick }: { onClick: () => void }) {
+function BackToMenuButton({ onClick }: { onClick: () => void }) {
   return (
-    <div className="flex shrink-0 justify-end border-b border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-900">
-      <button
-        onClick={onClick}
-        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-      >
-        Voltar ao Menu Principal
-      </button>
-    </div>
+    <button
+      onClick={onClick}
+      title="Voltar ao Menu Principal"
+      className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+        <path d="M3 12 12 3l9 9" />
+        <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+      </svg>
+    </button>
   );
 }
 
@@ -74,48 +76,46 @@ export default function App() {
   const acompanhantePadrao = [settings?.tecnicoNome, settings?.tecnicoEmpresa].filter(Boolean).join(" - ");
 
   return (
-    <div className="flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
+    <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
       <ThemeToggle theme={theme} onToggle={toggle} />
 
-      {route.name !== "menu" && <BackToMenuBar onClick={() => setRoute({ name: "menu" })} />}
+      {route.name !== "menu" && <BackToMenuButton onClick={() => setRoute({ name: "menu" })} />}
 
-      <div className="flex-1 overflow-y-auto">
-        {route.name === "menu" && (
-          <MainMenu
-            onOpenAtendimentos={() => setRoute({ name: "home" })}
-            onOpenSettings={() => setRoute({ name: "settings" })}
-          />
-        )}
+      {route.name === "menu" && (
+        <MainMenu
+          onOpenAtendimentos={() => setRoute({ name: "home" })}
+          onOpenSettings={() => setRoute({ name: "settings" })}
+        />
+      )}
 
-        {route.name === "home" && (
-          <Home
-            onBack={() => setRoute({ name: "menu" })}
-            onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
-          />
-        )}
+      {route.name === "home" && (
+        <Home
+          onBack={() => setRoute({ name: "menu" })}
+          onOpenCliente={(empresa) => setRoute({ name: "cliente", empresa })}
+        />
+      )}
 
-        {route.name === "cliente" && (
-          <Cliente
-            empresa={route.empresa}
-            tiposDeVisita={tiposDeVisita}
-            onBack={() => setRoute({ name: "home" })}
-            onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
-            onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
-          />
-        )}
+      {route.name === "cliente" && (
+        <Cliente
+          empresa={route.empresa}
+          tiposDeVisita={tiposDeVisita}
+          onBack={() => setRoute({ name: "home" })}
+          onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+          onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
+        />
+      )}
 
-        {route.name === "visita" && (
-          <Visita
-            visitaRef={route.ref}
-            acompanhantePadrao={acompanhantePadrao}
-            onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
-          />
-        )}
+      {route.name === "visita" && (
+        <Visita
+          visitaRef={route.ref}
+          acompanhantePadrao={acompanhantePadrao}
+          onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
+        />
+      )}
 
-        {route.name === "settings" && (
-          <Settings onBack={() => setRoute({ name: "menu" })} onSettingsChanged={setSettings} />
-        )}
-      </div>
+      {route.name === "settings" && (
+        <Settings onBack={() => setRoute({ name: "menu" })} onSettingsChanged={setSettings} />
+      )}
     </div>
   );
 }
