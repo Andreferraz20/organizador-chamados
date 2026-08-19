@@ -11,6 +11,19 @@ const TIPOS_MAQUINA = [
   "Secadora Dupla",
 ];
 
+/** Quantas bocas cada tipo de máquina ocupa, pra somar automaticamente a Quantidade de Bocas. */
+const BOCAS_POR_TIPO: Record<string, number> = {
+  "Lavadora Individual": 1,
+  "Secadora Individual": 1,
+  Topload: 1,
+  "Lava/Seca Stack": 2,
+  "Secadora Dupla": 2,
+};
+
+function calcularBocas(numerosSerie: NumeroSerie[]): number {
+  return numerosSerie.reduce((total, ns) => total + (BOCAS_POR_TIPO[ns.tipoMaquina] ?? 0), 0);
+}
+
 interface Props {
   empresa: string;
   onRenamed: (newEmpresa: string) => void;
@@ -91,12 +104,12 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
     try {
       const trimmedNome = form.nome.trim();
       let targetEmpresa = empresa;
-      let dataToSave = form;
+      let dataToSave = { ...form, quantidadeBocas: String(calcularBocas(form.numerosSerie)) };
       if (trimmedNome && trimmedNome !== empresa) {
         targetEmpresa = await api.empresas.rename(empresa, trimmedNome);
-        dataToSave = { ...form, nome: targetEmpresa };
-        setForm(dataToSave);
+        dataToSave = { ...dataToSave, nome: targetEmpresa };
       }
+      setForm(dataToSave);
       await api.clienteDados.save(targetEmpresa, dataToSave);
       if (targetEmpresa !== empresa) onRenamed(targetEmpresa);
       setSavedMessage("Salvo.");
@@ -111,6 +124,8 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
   if (loading) {
     return <p className="text-sm text-slate-400 dark:text-slate-500">Carregando…</p>;
   }
+
+  const quantidadeBocas = calcularBocas(form.numerosSerie);
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -147,14 +162,12 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
             <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
               Quantidade de Bocas
             </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={form.quantidadeBocas}
-              onChange={(e) => update("quantidadeBocas", e.target.value.replace(/\D/g, ""))}
-              className="w-12 rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
+            <div className="flex h-9 w-12 items-center justify-center rounded-md border border-slate-200 bg-slate-100 text-sm font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200">
+              {quantidadeBocas}
+            </div>
+            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+              Calculado a partir dos números de série.
+            </p>
           </div>
 
           <div>
