@@ -49,18 +49,19 @@ export function AnotacoesTecnicas({ onBack }: Props) {
 
   return (
     <div className="flex h-full flex-col p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <button
-            onClick={onBack}
-            className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            ← Menu
-          </button>
-          <h1 className="text-xl font-semibold uppercase tracking-wide text-slate-800 dark:text-slate-100">
-            Anotações Técnicas
-          </h1>
-        </div>
+      <div className="mb-6">
+        <button
+          onClick={onBack}
+          className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          ← Menu
+        </button>
+        <h1 className="text-xl font-semibold uppercase tracking-wide text-slate-800 dark:text-slate-100">
+          Anotações Técnicas
+        </h1>
+      </div>
+
+      <div className="mb-6">
         <button
           onClick={handleCreate}
           disabled={creating}
