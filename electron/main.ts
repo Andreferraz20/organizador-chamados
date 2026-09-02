@@ -5,6 +5,7 @@ import { registerFsHandlers, registerMediaContextMenu } from "./fs-ops";
 import { registerPdfHandlers } from "./pdf";
 import { registerDocumentacaoHandlers } from "./docs-ops";
 import { registerEstoqueHandlers } from "./estoque-ops";
+import { registerAnotacoesHandlers } from "./anotacoes-ops";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -85,5 +86,6 @@ app.whenReady().then(() => {
   registerPdfHandlers();
   registerDocumentacaoHandlers();
   registerEstoqueHandlers();
+  registerAnotacoesHandlers();
   createWindow();
 });

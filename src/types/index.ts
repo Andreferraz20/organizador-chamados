@@ -94,6 +94,14 @@ export interface PlacaWirelessItem extends EstoqueVinculo {
   id: string;
 }
 
+export interface AnotacaoTecnica {
+  id: string;
+  titulo: string;
+  /** Formato AAAA-MM-DD. */
+  data: string;
+  texto: string;
+}
+
 export type DocCategoria = "infraestrutura" | "tecnico" | "usuario";
 
 export interface DocumentoInfo {
@@ -161,6 +169,15 @@ export interface AppApi {
     saveGateway(id: string, dados: { idAnterior: string; idNovo: string }): Promise<GatewayItem>;
     listPlacas(): Promise<PlacaWirelessItem[]>;
     createPlaca(vinculo: EstoqueVinculo): Promise<PlacaWirelessItem>;
+  };
+  anotacoes: {
+    list(): Promise<AnotacaoTecnica[]>;
+    create(dados: { titulo: string; data: string; texto: string }): Promise<AnotacaoTecnica>;
+    save(id: string, dados: { titulo: string; data: string; texto: string }): Promise<AnotacaoTecnica>;
+    delete(id: string): Promise<boolean>;
+    listAnexos(id: string): Promise<FileEntry[]>;
+    addAnexos(id: string, sourcePaths: string[]): Promise<FileEntry[]>;
+    removeAnexo(id: string, fileName: string): Promise<void>;
   };
 }
 

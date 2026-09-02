@@ -84,6 +84,11 @@ const MIDIA_DIR = "fotos-videos";
 /** Pasta reservada na raiz pros dados do Estoque Técnico — não é um cliente, então fica de fora da listagem de empresas. */
 export const ESTOQUE_TECNICO_DIR = "Estoque Técnico";
 
+/** Pasta reservada na raiz pras Anotações Técnicas — mesma lógica do Estoque Técnico. */
+export const ANOTACOES_TECNICAS_DIR = "Anotações Técnicas";
+
+const RESERVED_ROOT_FOLDERS = [ESTOQUE_TECNICO_DIR, ANOTACOES_TECNICAS_DIR];
+
 /** Ícone cinza sólido usado no arraste nativo quando o arquivo (ex: vídeo) não dá pra virar thumbnail. */
 function createFallbackDragIcon() {
   const size = 32;
@@ -256,7 +261,7 @@ export function registerFsHandlers(): void {
   ipcMain.handle("empresas:list", async () => {
     const root = await ensureRootFolder();
     const dirs = await listSubdirectories(root);
-    return dirs.filter((d) => d !== ESTOQUE_TECNICO_DIR);
+    return dirs.filter((d) => !RESERVED_ROOT_FOLDERS.includes(d));
   });
 
   ipcMain.handle("empresas:create", async (_event, nome: string) => {

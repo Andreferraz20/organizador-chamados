@@ -9,6 +9,7 @@ import { Visita } from "./pages/Visita";
 import { Settings } from "./pages/Settings";
 import { Documentacao } from "./pages/Documentacao";
 import { EstoqueTecnico } from "./pages/EstoqueTecnico";
+import { AnotacoesTecnicas } from "./pages/AnotacoesTecnicas";
 import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
@@ -18,7 +19,8 @@ type Route =
   | { name: "visita"; ref: VisitaRef; voltarPara?: Route }
   | { name: "settings" }
   | { name: "documentacao" }
-  | { name: "estoque"; abrirGatewayId?: string };
+  | { name: "estoque"; abrirGatewayId?: string }
+  | { name: "anotacoes" };
 
 function BackToMenuButton({ onClick }: { onClick: () => void }) {
   return (
@@ -90,10 +92,13 @@ export default function App() {
         <MainMenu
           onOpenAtendimentos={() => setRoute({ name: "home" })}
           onOpenEstoqueTecnico={() => setRoute({ name: "estoque" })}
+          onOpenAnotacoesTecnicas={() => setRoute({ name: "anotacoes" })}
           onOpenDocumentacao={() => setRoute({ name: "documentacao" })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />
       )}
+
+      {route.name === "anotacoes" && <AnotacoesTecnicas onBack={() => setRoute({ name: "menu" })} />}
 
       {route.name === "documentacao" && <Documentacao onBack={() => setRoute({ name: "menu" })} />}
 

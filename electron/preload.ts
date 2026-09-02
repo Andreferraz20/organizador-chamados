@@ -69,4 +69,13 @@ contextBridge.exposeInMainWorld("app", {
     listPlacas: () => ipcRenderer.invoke("estoque:listPlacas"),
     createPlaca: (vinculo: unknown) => ipcRenderer.invoke("estoque:createPlaca", vinculo),
   },
+  anotacoes: {
+    list: () => ipcRenderer.invoke("anotacoes:list"),
+    create: (dados: unknown) => ipcRenderer.invoke("anotacoes:create", dados),
+    save: (id: string, dados: unknown) => ipcRenderer.invoke("anotacoes:save", id, dados),
+    delete: (id: string) => ipcRenderer.invoke("anotacoes:delete", id),
+    listAnexos: (id: string) => ipcRenderer.invoke("anotacoes:listAnexos", id),
+    addAnexos: (id: string, sourcePaths: string[]) => ipcRenderer.invoke("anotacoes:addAnexos", id, sourcePaths),
+    removeAnexo: (id: string, fileName: string) => ipcRenderer.invoke("anotacoes:removeAnexo", id, fileName),
+  },
 });
