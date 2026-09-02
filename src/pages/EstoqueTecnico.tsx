@@ -136,9 +136,10 @@ export function EstoqueTecnico({ onBack, onOpenVisita }: Props) {
                     <button
                       onClick={() => onOpenVisita(p.visitaRef!)}
                       title="Acessar Laudo Técnico"
-                      className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                      className="flex shrink-0 items-center gap-1 rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:bg-slate-800 dark:hover:text-blue-400"
                     >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                      Laudo Técnico
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
                         <path d="M9 6l6 6-6 6" />
                       </svg>
                     </button>
@@ -305,6 +306,7 @@ function VinculoModal({
 }) {
   const [modo, setModo] = useState<"visita" | "manual">("visita");
   const [empresas, setEmpresas] = useState<string[]>([]);
+  const [buscaCliente, setBuscaCliente] = useState("");
   const [empresaSelecionada, setEmpresaSelecionada] = useState<string | null>(null);
   const [grupos, setGrupos] = useState<MesGroup[]>([]);
   const [loadingGrupos, setLoadingGrupos] = useState(false);
@@ -384,25 +386,46 @@ function VinculoModal({
 
         {modo === "visita" ? (
           !empresaSelecionada ? (
-            <div className="max-h-72 space-y-1 overflow-y-auto">
-              {empresas.length === 0 ? (
-                <EmptyHint text="Nenhum cliente cadastrado ainda." />
-              ) : (
-                empresas.map((e) => (
-                  <button
-                    key={e}
-                    onClick={() => setEmpresaSelecionada(e)}
-                    className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
-                  >
-                    {e}
-                  </button>
-                ))
-              )}
+            <div>
+              <input
+                autoFocus
+                value={buscaCliente}
+                onChange={(e) => setBuscaCliente(e.target.value)}
+                placeholder="Buscar cliente…"
+                className="mb-2 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+              />
+              <div className="max-h-64 space-y-1 overflow-y-auto">
+                {empresas.length === 0 ? (
+                  <EmptyHint text="Nenhum cliente cadastrado ainda." />
+                ) : (
+                  (() => {
+                    const filtradas = empresas.filter((e) =>
+                      e.toLowerCase().includes(buscaCliente.trim().toLowerCase()),
+                    );
+                    return filtradas.length === 0 ? (
+                      <EmptyHint text="Nenhum cliente encontrado." />
+                    ) : (
+                      filtradas.map((e) => (
+                        <button
+                          key={e}
+                          onClick={() => setEmpresaSelecionada(e)}
+                          className="block w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"
+                        >
+                          {e}
+                        </button>
+                      ))
+                    );
+                  })()
+                )}
+              </div>
             </div>
           ) : (
             <div>
               <button
-                onClick={() => setEmpresaSelecionada(null)}
+                onClick={() => {
+                  setEmpresaSelecionada(null);
+                  setBuscaCliente("");
+                }}
                 className="mb-2 text-xs text-blue-600 hover:underline dark:text-blue-400"
               >
                 ← Trocar cliente
