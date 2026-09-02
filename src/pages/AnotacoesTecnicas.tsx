@@ -17,6 +17,8 @@ export function AnotacoesTecnicas({ onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AnotacaoTecnica | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   async function refresh() {
     setLoading(true);
@@ -39,11 +41,16 @@ export function AnotacoesTecnicas({ onBack }: Props) {
     }
   }
 
-  async function handleDelete(id: string) {
-    const deleted = await api.anotacoes.delete(id);
-    if (deleted) {
-      setAnotacoes((prev) => prev.filter((a) => a.id !== id));
-      if (expandedId === id) setExpandedId(null);
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.anotacoes.delete(deleteTarget.id);
+      setAnotacoes((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+      if (expandedId === deleteTarget.id) setExpandedId(null);
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -83,12 +90,38 @@ export function AnotacoesTecnicas({ onBack }: Props) {
               anotacao={a}
               expanded={expandedId === a.id}
               onToggle={() => setExpandedId(expandedId === a.id ? null : a.id)}
-              onDelete={() => handleDelete(a.id)}
+              onDelete={() => setDeleteTarget(a)}
               onSaved={(updated) =>
                 setAnotacoes((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
               }
             />
           ))}
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Excluir esta anotação?</h3>
+            <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+              Isso apaga o texto e os anexos de "{deleteTarget.titulo || "Sem título"}". Não é possível desfazer.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "Excluindo…" : "Excluir"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

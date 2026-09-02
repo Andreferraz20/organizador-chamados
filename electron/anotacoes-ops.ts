@@ -1,4 +1,4 @@
-import { dialog, ipcMain } from "electron";
+import { ipcMain } from "electron";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
@@ -111,17 +111,7 @@ export function registerAnotacoesHandlers(): void {
 
   ipcMain.handle("anotacoes:delete", async (_event, id: string) => {
     const { root } = await ensureContext();
-    const { response } = await dialog.showMessageBox({
-      type: "warning",
-      buttons: ["Cancelar", "Excluir"],
-      defaultId: 0,
-      cancelId: 0,
-      message: "Excluir esta anotação?",
-      detail: "Isso apaga o texto e os anexos dessa anotação. Não é possível desfazer.",
-    });
-    if (response !== 1) return false;
     await fs.rm(anotacaoDir(root, id), { recursive: true, force: true });
-    return true;
   });
 
   ipcMain.handle("anotacoes:listAnexos", async (_event, id: string) => {

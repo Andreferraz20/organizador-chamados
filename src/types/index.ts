@@ -174,7 +174,7 @@ export interface AppApi {
     list(): Promise<AnotacaoTecnica[]>;
     create(dados: { titulo: string; data: string; texto: string }): Promise<AnotacaoTecnica>;
     save(id: string, dados: { titulo: string; data: string; texto: string }): Promise<AnotacaoTecnica>;
-    delete(id: string): Promise<boolean>;
+    delete(id: string): Promise<void>;
     listAnexos(id: string): Promise<FileEntry[]>;
     addAnexos(id: string, sourcePaths: string[]): Promise<FileEntry[]>;
     removeAnexo(id: string, fileName: string): Promise<void>;
