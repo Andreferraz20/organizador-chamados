@@ -3,27 +3,41 @@ import { ClienteDadosForm } from "../components/ClienteDadosForm";
 import { ClienteDetalhesForm } from "../components/ClienteDetalhesForm";
 import { VisitasTecnicas } from "../components/VisitasTecnicas";
 import { VisitasRecorrencia } from "../components/VisitasRecorrencia";
+import { ClienteEstoqueTecnico } from "../components/ClienteEstoqueTecnico";
 import type { VisitaRef } from "../types";
 
 interface Props {
   empresa: string;
   tiposDeVisita: string[];
+  initialTab?: Tab;
+  initialGatewayId?: string | null;
   onBack: () => void;
   onOpenVisita: (ref: VisitaRef) => void;
+  onOpenVisitaFromEstoque: (ref: VisitaRef, gatewayId?: string) => void;
   onRenamed: (newEmpresa: string) => void;
 }
 
-type Tab = "dados" | "detalhes" | "visitas" | "recorrencia";
+export type Tab = "dados" | "detalhes" | "visitas" | "recorrencia" | "estoque";
 
 const TABS: [Tab, string][] = [
   ["dados", "Dados do Cliente"],
   ["detalhes", "Detalhes do Cliente"],
   ["visitas", "Visitas Técnicas"],
   ["recorrencia", "Recorrência de Visitas"],
+  ["estoque", "Estoque Técnico"],
 ];
 
-export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRenamed }: Props) {
-  const [tab, setTab] = useState<Tab>("dados");
+export function Cliente({
+  empresa,
+  tiposDeVisita,
+  initialTab,
+  initialGatewayId,
+  onBack,
+  onOpenVisita,
+  onOpenVisitaFromEstoque,
+  onRenamed,
+}: Props) {
+  const [tab, setTab] = useState<Tab>(initialTab ?? "dados");
   const [visitasInitialMes, setVisitasInitialMes] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,6 +92,13 @@ export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRename
         )}
         {tab === "recorrencia" && (
           <VisitasRecorrencia empresa={empresa} tiposDeVisita={tiposDeVisita} onOpenMes={handleOpenMes} />
+        )}
+        {tab === "estoque" && (
+          <ClienteEstoqueTecnico
+            empresa={empresa}
+            initialGatewayId={initialGatewayId}
+            onOpenVisita={onOpenVisitaFromEstoque}
+          />
         )}
       </div>
     </div>

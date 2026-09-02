@@ -5,16 +5,17 @@ import type { EstoqueVinculo, GatewayItem, PlacaWirelessItem, VisitaRef } from "
 
 interface Props {
   onBack: () => void;
-  onOpenVisita: (ref: VisitaRef) => void;
+  onOpenVisita: (ref: VisitaRef, gatewayId?: string) => void;
+  initialGatewayId?: string | null;
 }
 
-export function EstoqueTecnico({ onBack, onOpenVisita }: Props) {
+export function EstoqueTecnico({ onBack, onOpenVisita, initialGatewayId }: Props) {
   const [gateways, setGateways] = useState<GatewayItem[]>([]);
   const [placas, setPlacas] = useState<PlacaWirelessItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddGateway, setShowAddGateway] = useState(false);
   const [showAddPlaca, setShowAddPlaca] = useState(false);
-  const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(null);
+  const [selectedGatewayId, setSelectedGatewayId] = useState<string | null>(initialGatewayId ?? null);
 
   async function refresh() {
     setLoading(true);
@@ -49,7 +50,7 @@ export function EstoqueTecnico({ onBack, onOpenVisita }: Props) {
           setSelectedGatewayId(null);
           refresh();
         }}
-        onOpenVisita={onOpenVisita}
+        onOpenVisita={(ref) => onOpenVisita(ref, selectedGatewayId)}
       />
     );
   }
@@ -169,7 +170,7 @@ export function EstoqueTecnico({ onBack, onOpenVisita }: Props) {
   );
 }
 
-function GatewayDetalhe({
+export function GatewayDetalhe({
   id,
   onBack,
   onOpenVisita,

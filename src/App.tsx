@@ -4,6 +4,7 @@ import { useTheme } from "./lib/theme";
 import { MainMenu } from "./pages/MainMenu";
 import { Home } from "./pages/Home";
 import { Cliente } from "./pages/Cliente";
+import type { Tab as ClienteTab } from "./pages/Cliente";
 import { Visita } from "./pages/Visita";
 import { Settings } from "./pages/Settings";
 import { Documentacao } from "./pages/Documentacao";
@@ -13,11 +14,11 @@ import type { AppSettings, VisitaRef } from "./types";
 type Route =
   | { name: "menu" }
   | { name: "home" }
-  | { name: "cliente"; empresa: string }
-  | { name: "visita"; ref: VisitaRef }
+  | { name: "cliente"; empresa: string; tab?: ClienteTab; abrirGatewayId?: string }
+  | { name: "visita"; ref: VisitaRef; voltarPara?: Route }
   | { name: "settings" }
   | { name: "documentacao" }
-  | { name: "estoque" };
+  | { name: "estoque"; abrirGatewayId?: string };
 
 function BackToMenuButton({ onClick }: { onClick: () => void }) {
   return (
@@ -99,7 +100,10 @@ export default function App() {
       {route.name === "estoque" && (
         <EstoqueTecnico
           onBack={() => setRoute({ name: "menu" })}
-          onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+          initialGatewayId={route.abrirGatewayId ?? null}
+          onOpenVisita={(ref, gatewayId) =>
+            setRoute({ name: "visita", ref, voltarPara: { name: "estoque", abrirGatewayId: gatewayId } })
+          }
         />
       )}
 
@@ -114,8 +118,17 @@ export default function App() {
         <Cliente
           empresa={route.empresa}
           tiposDeVisita={tiposDeVisita}
+          initialTab={route.tab}
+          initialGatewayId={route.abrirGatewayId}
           onBack={() => setRoute({ name: "home" })}
           onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+          onOpenVisitaFromEstoque={(ref, gatewayId) =>
+            setRoute({
+              name: "visita",
+              ref,
+              voltarPara: { name: "cliente", empresa: route.empresa, tab: "estoque", abrirGatewayId: gatewayId },
+            })
+          }
           onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
         />
       )}
@@ -124,7 +137,7 @@ export default function App() {
         <Visita
           visitaRef={route.ref}
           acompanhantePadrao={acompanhantePadrao}
-          onBack={() => setRoute({ name: "cliente", empresa: route.ref.empresa })}
+          onBack={() => setRoute(route.voltarPara ?? { name: "cliente", empresa: route.ref.empresa })}
         />
       )}
 
