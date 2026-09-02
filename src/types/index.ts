@@ -76,6 +76,24 @@ export interface ClienteDetalhes {
   problemas: ProblemaDetalhe[];
 }
 
+export interface EstoqueVinculo {
+  cliente: string;
+  /** Formato AAAA-MM-DD, ou null quando a data não é conhecida (registro antigo, anterior ao app). */
+  data: string | null;
+  /** Presente quando vinculado a uma visita técnica existente — dá acesso ao Laudo Técnico. */
+  visitaRef: VisitaRef | null;
+}
+
+export interface GatewayItem extends EstoqueVinculo {
+  id: string;
+  idAnterior: string;
+  idNovo: string;
+}
+
+export interface PlacaWirelessItem extends EstoqueVinculo {
+  id: string;
+}
+
 export type DocCategoria = "infraestrutura" | "tecnico" | "usuario";
 
 export interface DocumentoInfo {
@@ -136,6 +154,13 @@ export interface AppApi {
     open(categoria: DocCategoria, arquivo: string): Promise<void>;
     add(categoria: DocCategoria): Promise<DocumentoInfo[]>;
     rename(categoria: DocCategoria, arquivo: string, novoNome: string): Promise<DocumentoInfo[]>;
+  };
+  estoque: {
+    listGateways(): Promise<GatewayItem[]>;
+    createGateway(vinculo: EstoqueVinculo): Promise<GatewayItem>;
+    saveGateway(id: string, dados: { idAnterior: string; idNovo: string }): Promise<GatewayItem>;
+    listPlacas(): Promise<PlacaWirelessItem[]>;
+    createPlaca(vinculo: EstoqueVinculo): Promise<PlacaWirelessItem>;
   };
 }
 

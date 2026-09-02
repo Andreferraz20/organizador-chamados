@@ -37,6 +37,12 @@ export function formatMesNomeOnly(mes: string): string {
   return NOMES_MESES[index] ?? mesNum;
 }
 
+/** Formata uma data "AAAA-MM-DD" como "DD/MM/AAAA". */
+export function formatDataCurta(isoDate: string): string {
+  const [ano, mes, dia] = isoDate.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
 export function visitaLabel(ref: VisitaRef): string {
   return `${ref.dia}/${ref.mes} — ${ref.tipoVisita}`;
 }

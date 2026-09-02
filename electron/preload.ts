@@ -62,4 +62,11 @@ contextBridge.exposeInMainWorld("app", {
     rename: (categoria: string, arquivo: string, novoNome: string) =>
       ipcRenderer.invoke("documentacao:rename", categoria, arquivo, novoNome),
   },
+  estoque: {
+    listGateways: () => ipcRenderer.invoke("estoque:listGateways"),
+    createGateway: (vinculo: unknown) => ipcRenderer.invoke("estoque:createGateway", vinculo),
+    saveGateway: (id: string, dados: unknown) => ipcRenderer.invoke("estoque:saveGateway", id, dados),
+    listPlacas: () => ipcRenderer.invoke("estoque:listPlacas"),
+    createPlaca: (vinculo: unknown) => ipcRenderer.invoke("estoque:createPlaca", vinculo),
+  },
 });

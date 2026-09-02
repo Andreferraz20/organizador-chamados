@@ -7,6 +7,7 @@ import { Cliente } from "./pages/Cliente";
 import { Visita } from "./pages/Visita";
 import { Settings } from "./pages/Settings";
 import { Documentacao } from "./pages/Documentacao";
+import { EstoqueTecnico } from "./pages/EstoqueTecnico";
 import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
@@ -15,7 +16,8 @@ type Route =
   | { name: "cliente"; empresa: string }
   | { name: "visita"; ref: VisitaRef }
   | { name: "settings" }
-  | { name: "documentacao" };
+  | { name: "documentacao" }
+  | { name: "estoque" };
 
 function BackToMenuButton({ onClick }: { onClick: () => void }) {
   return (
@@ -86,12 +88,20 @@ export default function App() {
       {route.name === "menu" && (
         <MainMenu
           onOpenAtendimentos={() => setRoute({ name: "home" })}
+          onOpenEstoqueTecnico={() => setRoute({ name: "estoque" })}
           onOpenDocumentacao={() => setRoute({ name: "documentacao" })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />
       )}
 
       {route.name === "documentacao" && <Documentacao onBack={() => setRoute({ name: "menu" })} />}
+
+      {route.name === "estoque" && (
+        <EstoqueTecnico
+          onBack={() => setRoute({ name: "menu" })}
+          onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
+        />
+      )}
 
       {route.name === "home" && (
         <Home

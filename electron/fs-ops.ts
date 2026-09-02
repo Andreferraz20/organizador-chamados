@@ -81,6 +81,9 @@ const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".heic", ".webp", ".gif"];
 const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".mkv", ".webm"];
 const MIDIA_DIR = "fotos-videos";
 
+/** Pasta reservada na raiz pros dados do Estoque Técnico — não é um cliente, então fica de fora da listagem de empresas. */
+export const ESTOQUE_TECNICO_DIR = "Estoque Técnico";
+
 /** Ícone cinza sólido usado no arraste nativo quando o arquivo (ex: vídeo) não dá pra virar thumbnail. */
 function createFallbackDragIcon() {
   const size = 32;
@@ -252,7 +255,8 @@ export function registerFsHandlers(): void {
 
   ipcMain.handle("empresas:list", async () => {
     const root = await ensureRootFolder();
-    return listSubdirectories(root);
+    const dirs = await listSubdirectories(root);
+    return dirs.filter((d) => d !== ESTOQUE_TECNICO_DIR);
   });
 
   ipcMain.handle("empresas:create", async (_event, nome: string) => {

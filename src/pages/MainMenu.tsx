@@ -1,10 +1,11 @@
 interface Props {
   onOpenAtendimentos: () => void;
+  onOpenEstoqueTecnico: () => void;
   onOpenDocumentacao: () => void;
   onOpenSettings: () => void;
 }
 
-export function MainMenu({ onOpenAtendimentos, onOpenDocumentacao, onOpenSettings }: Props) {
+export function MainMenu({ onOpenAtendimentos, onOpenEstoqueTecnico, onOpenDocumentacao, onOpenSettings }: Props) {
   return (
     <div className="relative flex h-full flex-col items-center justify-center gap-10 p-8">
       <button
@@ -23,7 +24,7 @@ export function MainMenu({ onOpenAtendimentos, onOpenDocumentacao, onOpenSetting
       <div className="flex flex-col items-center gap-4">
         <div className="flex items-stretch justify-center gap-4">
           <MenuOption label="Atendimentos" onClick={onOpenAtendimentos} />
-          <MenuOption label="Estoque Técnico" comingSoon />
+          <MenuOption label="Estoque Técnico" onClick={onOpenEstoqueTecnico} />
           <MenuOption label="Anotações Técnicas" comingSoon />
         </div>
         <div className="flex items-stretch justify-center gap-4">
