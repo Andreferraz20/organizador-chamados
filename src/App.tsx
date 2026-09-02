@@ -91,7 +91,7 @@ export default function App() {
         />
       )}
 
-      {route.name === "documentacao" && <Documentacao />}
+      {route.name === "documentacao" && <Documentacao onBack={() => setRoute({ name: "menu" })} />}
 
       {route.name === "home" && (
         <Home

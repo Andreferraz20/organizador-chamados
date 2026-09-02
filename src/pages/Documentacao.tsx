@@ -9,12 +9,22 @@ const CATEGORIAS: { value: DocCategoria; label: string }[] = [
   { value: "usuario", label: "Usuário" },
 ];
 
-export function Documentacao() {
+interface Props {
+  onBack: () => void;
+}
+
+export function Documentacao({ onBack }: Props) {
   const [categoria, setCategoria] = useState<DocCategoria | null>(null);
 
   if (!categoria) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-10 p-8">
+      <div className="relative flex h-full flex-col items-center justify-center gap-10 p-8">
+        <button
+          onClick={onBack}
+          className="absolute left-6 top-6 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          ← Menu
+        </button>
         <h1 className="text-3xl font-bold uppercase tracking-wide text-slate-800 dark:text-slate-100">
           Documentação
         </h1>
