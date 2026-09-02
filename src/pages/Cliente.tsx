@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ClienteDadosForm } from "../components/ClienteDadosForm";
 import { ClienteDetalhesForm } from "../components/ClienteDetalhesForm";
 import { VisitasTecnicas } from "../components/VisitasTecnicas";
@@ -24,6 +24,18 @@ const TABS: [Tab, string][] = [
 
 export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRenamed }: Props) {
   const [tab, setTab] = useState<Tab>("dados");
+  const [visitasInitialMes, setVisitasInitialMes] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tab === "visitas" && visitasInitialMes) {
+      setVisitasInitialMes(null);
+    }
+  }, [tab, visitasInitialMes]);
+
+  function handleOpenMes(mes: string) {
+    setVisitasInitialMes(mes);
+    setTab("visitas");
+  }
 
   return (
     <div className="flex h-full flex-col p-8">
@@ -57,9 +69,16 @@ export function Cliente({ empresa, tiposDeVisita, onBack, onOpenVisita, onRename
         {tab === "dados" && <ClienteDadosForm empresa={empresa} onRenamed={onRenamed} />}
         {tab === "detalhes" && <ClienteDetalhesForm empresa={empresa} onOpenVisita={onOpenVisita} />}
         {tab === "visitas" && (
-          <VisitasTecnicas empresa={empresa} tiposDeVisita={tiposDeVisita} onOpenVisita={onOpenVisita} />
+          <VisitasTecnicas
+            empresa={empresa}
+            tiposDeVisita={tiposDeVisita}
+            onOpenVisita={onOpenVisita}
+            initialMes={visitasInitialMes}
+          />
         )}
-        {tab === "recorrencia" && <VisitasRecorrencia empresa={empresa} tiposDeVisita={tiposDeVisita} />}
+        {tab === "recorrencia" && (
+          <VisitasRecorrencia empresa={empresa} tiposDeVisita={tiposDeVisita} onOpenMes={handleOpenMes} />
+        )}
       </div>
     </div>
   );

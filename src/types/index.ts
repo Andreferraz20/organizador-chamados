@@ -76,6 +76,15 @@ export interface ClienteDetalhes {
   problemas: ProblemaDetalhe[];
 }
 
+export type DocCategoria = "infraestrutura" | "tecnico" | "usuario";
+
+export interface DocumentoInfo {
+  /** Nome de exibição, sem extensão. */
+  nome: string;
+  /** Nome do arquivo em disco, com extensão. */
+  arquivo: string;
+}
+
 export interface AppApi {
   settings: {
     get(): Promise<AppSettings>;
@@ -121,6 +130,12 @@ export interface AppApi {
   media: {
     onRename(callback: (filePath: string) => void): () => void;
     onRefresh(callback: () => void): () => void;
+  };
+  documentacao: {
+    list(categoria: DocCategoria): Promise<DocumentoInfo[]>;
+    open(categoria: DocCategoria, arquivo: string): Promise<void>;
+    add(categoria: DocCategoria): Promise<DocumentoInfo[]>;
+    rename(categoria: DocCategoria, arquivo: string, novoNome: string): Promise<DocumentoInfo[]>;
   };
 }
 

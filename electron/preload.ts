@@ -55,4 +55,11 @@ contextBridge.exposeInMainWorld("app", {
       return () => ipcRenderer.removeListener("media:refresh", listener);
     },
   },
+  documentacao: {
+    list: (categoria: string) => ipcRenderer.invoke("documentacao:list", categoria),
+    open: (categoria: string, arquivo: string) => ipcRenderer.invoke("documentacao:open", categoria, arquivo),
+    add: (categoria: string) => ipcRenderer.invoke("documentacao:add", categoria),
+    rename: (categoria: string, arquivo: string, novoNome: string) =>
+      ipcRenderer.invoke("documentacao:rename", categoria, arquivo, novoNome),
+  },
 });

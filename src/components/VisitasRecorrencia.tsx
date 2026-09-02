@@ -5,6 +5,7 @@ import { EmptyHint } from "./EmptyHint";
 interface Props {
   empresa: string;
   tiposDeVisita: string[];
+  onOpenMes: (mes: string) => void;
 }
 
 interface MesInfo {
@@ -12,7 +13,7 @@ interface MesInfo {
   visitas: { dia: string; tipoVisita: string }[];
 }
 
-export function VisitasRecorrencia({ empresa, tiposDeVisita }: Props) {
+export function VisitasRecorrencia({ empresa, tiposDeVisita, onOpenMes }: Props) {
   const [loading, setLoading] = useState(true);
   const [porMes, setPorMes] = useState<MesInfo[]>([]);
   const [expandido, setExpandido] = useState<string | null>(null);
@@ -66,15 +67,26 @@ export function VisitasRecorrencia({ empresa, tiposDeVisita }: Props) {
                   key={info.mes}
                   className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800"
                 >
-                  <button
-                    onClick={() => setExpandido(isOpen ? null : info.mes)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
-                  >
-                    <span>{formatMesNomeOnly(info.mes)}</span>
-                    <span className="text-slate-400 dark:text-slate-500">
-                      {info.visitas.length} visita{info.visitas.length !== 1 ? "s" : ""}
-                    </span>
-                  </button>
+                  <div className="flex items-stretch">
+                    <button
+                      onClick={() => setExpandido(isOpen ? null : info.mes)}
+                      className="flex flex-1 items-center justify-between px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                    >
+                      <span>{formatMesNomeOnly(info.mes)}</span>
+                      <span className="text-slate-400 dark:text-slate-500">
+                        {info.visitas.length} visita{info.visitas.length !== 1 ? "s" : ""}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => onOpenMes(info.mes)}
+                      title="Ver visitas desse mês"
+                      className="flex items-center border-l border-slate-200 px-3 text-slate-400 hover:bg-slate-50 hover:text-blue-600 dark:border-slate-800 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                        <path d="M9 6l6 6-6 6" />
+                      </svg>
+                    </button>
+                  </div>
                   {isOpen && (
                     <div className="space-y-1.5 border-t border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
                       {tiposDeVisita.map((tipo) => {

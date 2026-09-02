@@ -7,6 +7,7 @@ interface Props {
   empresa: string;
   tiposDeVisita: string[];
   onOpenVisita: (ref: VisitaRef) => void;
+  initialMes?: string | null;
 }
 
 interface VisitaResumo {
@@ -14,9 +15,9 @@ interface VisitaResumo {
   tipoVisita: string;
 }
 
-export function VisitasTecnicas({ empresa, tiposDeVisita, onOpenVisita }: Props) {
+export function VisitasTecnicas({ empresa, tiposDeVisita, onOpenVisita, initialMes }: Props) {
   const [meses, setMeses] = useState<string[]>([]);
-  const [selectedMes, setSelectedMes] = useState<string | null>(null);
+  const [selectedMes, setSelectedMes] = useState<string | null>(initialMes ?? null);
   const [visitas, setVisitas] = useState<VisitaResumo[]>([]);
 
   const [showForm, setShowForm] = useState(false);

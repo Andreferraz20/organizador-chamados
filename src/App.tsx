@@ -6,6 +6,7 @@ import { Home } from "./pages/Home";
 import { Cliente } from "./pages/Cliente";
 import { Visita } from "./pages/Visita";
 import { Settings } from "./pages/Settings";
+import { Documentacao } from "./pages/Documentacao";
 import type { AppSettings, VisitaRef } from "./types";
 
 type Route =
@@ -13,7 +14,8 @@ type Route =
   | { name: "home" }
   | { name: "cliente"; empresa: string }
   | { name: "visita"; ref: VisitaRef }
-  | { name: "settings" };
+  | { name: "settings" }
+  | { name: "documentacao" };
 
 function BackToMenuButton({ onClick }: { onClick: () => void }) {
   return (
@@ -84,9 +86,12 @@ export default function App() {
       {route.name === "menu" && (
         <MainMenu
           onOpenAtendimentos={() => setRoute({ name: "home" })}
+          onOpenDocumentacao={() => setRoute({ name: "documentacao" })}
           onOpenSettings={() => setRoute({ name: "settings" })}
         />
       )}
+
+      {route.name === "documentacao" && <Documentacao />}
 
       {route.name === "home" && (
         <Home

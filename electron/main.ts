@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { registerFsHandlers, registerMediaContextMenu } from "./fs-ops";
 import { registerPdfHandlers } from "./pdf";
+import { registerDocumentacaoHandlers } from "./docs-ops";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -81,5 +82,6 @@ app.whenReady().then(() => {
 
   registerFsHandlers();
   registerPdfHandlers();
+  registerDocumentacaoHandlers();
   createWindow();
 });

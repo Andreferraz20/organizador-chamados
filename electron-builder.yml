@@ -5,6 +5,9 @@ directories:
 files:
   - dist/**/*
   - dist-electron/**/*
+extraResources:
+  - from: resources/documentacao
+    to: documentacao
 win:
   target: nsis
   icon: build/icon.ico
