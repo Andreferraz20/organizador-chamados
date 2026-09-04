@@ -198,7 +198,7 @@ function AdicionarClienteModal({
             <input
               autoFocus
               value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              onChange={(e) => setNome(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
@@ -210,7 +210,7 @@ function AdicionarClienteModal({
             </label>
             <input
               value={endereco}
-              onChange={(e) => setEndereco(e.target.value)}
+              onChange={(e) => setEndereco(e.target.value.toUpperCase())}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>

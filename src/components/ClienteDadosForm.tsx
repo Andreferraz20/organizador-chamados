@@ -136,7 +136,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
           </label>
           <input
             value={form.nome}
-            onChange={(e) => update("nome", e.target.value)}
+            onChange={(e) => update("nome", e.target.value.toUpperCase())}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
           <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
@@ -150,7 +150,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
           </label>
           <input
             value={form.endereco}
-            onChange={(e) => update("endereco", e.target.value)}
+            onChange={(e) => update("endereco", e.target.value.toUpperCase())}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>
