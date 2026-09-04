@@ -3,7 +3,7 @@ import { api } from "../lib/api";
 import { EmptyHint } from "./EmptyHint";
 import type { ClienteDados, NumeroSerie, Pessoa } from "../types";
 
-const TIPOS_MAQUINA = [
+export const TIPOS_MAQUINA = [
   "Lavadora Individual",
   "Secadora Individual",
   "Topload",
@@ -20,7 +20,7 @@ const BOCAS_POR_TIPO: Record<string, number> = {
   "Secadora Dupla": 2,
 };
 
-function calcularBocas(numerosSerie: NumeroSerie[]): number {
+export function calcularBocas(numerosSerie: NumeroSerie[]): number {
   return numerosSerie.reduce((total, ns) => total + (BOCAS_POR_TIPO[ns.tipoMaquina] ?? 0), 0);
 }
 
