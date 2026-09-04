@@ -68,6 +68,8 @@ contextBridge.exposeInMainWorld("app", {
     saveGateway: (id: string, dados: unknown) => ipcRenderer.invoke("estoque:saveGateway", id, dados),
     listPlacas: () => ipcRenderer.invoke("estoque:listPlacas"),
     createPlaca: (vinculo: unknown) => ipcRenderer.invoke("estoque:createPlaca", vinculo),
+    deleteGateway: (id: string) => ipcRenderer.invoke("estoque:deleteGateway", id),
+    deletePlaca: (id: string) => ipcRenderer.invoke("estoque:deletePlaca", id),
   },
   anotacoes: {
     list: () => ipcRenderer.invoke("anotacoes:list"),

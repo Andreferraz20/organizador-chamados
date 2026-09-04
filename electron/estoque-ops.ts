@@ -120,4 +120,14 @@ export function registerEstoqueHandlers(): void {
     const { root } = await ensureContext();
     return createItem<Record<string, never>>(placasDir(root), vinculo, {});
   });
+
+  ipcMain.handle("estoque:deleteGateway", async (_event, id: string) => {
+    const { root } = await ensureContext();
+    await fs.rm(path.join(gatewaysDir(root), id), { recursive: true, force: true });
+  });
+
+  ipcMain.handle("estoque:deletePlaca", async (_event, id: string) => {
+    const { root } = await ensureContext();
+    await fs.rm(path.join(placasDir(root), id), { recursive: true, force: true });
+  });
 }

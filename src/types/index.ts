@@ -169,6 +169,8 @@ export interface AppApi {
     saveGateway(id: string, dados: { idAnterior: string; idNovo: string }): Promise<GatewayItem>;
     listPlacas(): Promise<PlacaWirelessItem[]>;
     createPlaca(vinculo: EstoqueVinculo): Promise<PlacaWirelessItem>;
+    deleteGateway(id: string): Promise<void>;
+    deletePlaca(id: string): Promise<void>;
   };
   anotacoes: {
     list(): Promise<AnotacaoTecnica[]>;
