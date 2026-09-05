@@ -202,36 +202,54 @@ export function GatewayDetalhe({ id, onBack, onOpenVisita, readOnly, onDelete }:
       ) : !item ? (
         <p className="text-sm text-slate-400 dark:text-slate-500">Registro não encontrado.</p>
       ) : (
-        <div className="max-w-md space-y-4">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-              Data
-            </label>
-            <p className="text-sm text-slate-700 dark:text-slate-200">
-              {item.data ? formatDataCurta(item.data) : "Não informada"}
-              {item.visitaRef && (
-                <span className="text-slate-400 dark:text-slate-500"> (baseada no laudo técnico)</span>
-              )}
-            </p>
-          </div>
-
+        <div className={readOnly ? "max-w-2xl space-y-6" : "max-w-md space-y-4"}>
           {readOnly ? (
             <>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                  ID do Gateway Anterior
-                </label>
-                <p className="text-sm text-slate-700 dark:text-slate-200">{item.idAnterior || "—"}</p>
+              <div className="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">Data</div>
+                <div className="mt-1 text-lg font-medium text-slate-800 dark:text-slate-100">
+                  {item.data ? formatDataCurta(item.data) : "Não informada"}
+                  {item.visitaRef && (
+                    <span className="ml-2 text-sm font-normal text-slate-400 dark:text-slate-500">
+                      (baseada no laudo técnico)
+                    </span>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                  ID do Gateway Novo
-                </label>
-                <p className="text-sm text-slate-700 dark:text-slate-200">{item.idNovo || "—"}</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                    ID do Gateway Anterior
+                  </label>
+                  <div className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                    {item.idAnterior || "—"}
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                    ID do Gateway Novo
+                  </label>
+                  <div className="w-full rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                    {item.idNovo || "—"}
+                  </div>
+                </div>
               </div>
             </>
           ) : (
             <>
+              <div>
+                <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                  Data
+                </label>
+                <p className="text-sm text-slate-700 dark:text-slate-200">
+                  {item.data ? formatDataCurta(item.data) : "Não informada"}
+                  {item.visitaRef && (
+                    <span className="text-slate-400 dark:text-slate-500"> (baseada no laudo técnico)</span>
+                  )}
+                </p>
+              </div>
+
               <div>
                 <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
                   ID do Gateway Anterior

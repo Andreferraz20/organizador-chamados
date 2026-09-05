@@ -71,7 +71,7 @@ export function Visita({ visitaRef, onBack }: Props) {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {tab === "laudo" && <LaudoForm visitaRef={visitaRef} />}
+        {tab === "laudo" && <LaudoForm visitaRef={visitaRef} onDeleted={onBack} />}
         {tab === "midia" && <FileDropzone visitaRef={visitaRef} />}
       </div>
     </div>

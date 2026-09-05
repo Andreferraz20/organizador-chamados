@@ -5,6 +5,7 @@ import type { LaudoData, VisitaRef } from "../types";
 
 interface Props {
   visitaRef: VisitaRef;
+  onDeleted: () => void;
 }
 
 const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
@@ -15,7 +16,7 @@ const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
   acompanhante: "",
 };
 
-export function LaudoForm({ visitaRef }: Props) {
+export function LaudoForm({ visitaRef, onDeleted }: Props) {
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
   const [savingAction, setSavingAction] = useState<"save" | "generate" | null>(null);
@@ -78,9 +79,7 @@ export function LaudoForm({ visitaRef }: Props) {
     setDeleting(true);
     try {
       await api.laudo.delete(visitaRef);
-      setForm(EMPTY);
-      setConfirmDelete(false);
-      setSavedMessage("Laudo excluído.");
+      onDeleted();
     } finally {
       setDeleting(false);
     }
@@ -150,7 +149,7 @@ export function LaudoForm({ visitaRef }: Props) {
           <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800">
             <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Excluir este laudo?</h3>
             <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-              Isso apaga o texto e o PDF gerado desse laudo. Não é possível desfazer.
+              Isso apaga a visita inteira: fotos, vídeos e o laudo. Não é possível desfazer.
             </p>
             <div className="flex justify-end gap-2">
               <button

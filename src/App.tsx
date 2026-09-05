@@ -125,12 +125,16 @@ export default function App() {
           initialTab={route.tab}
           initialGatewayId={route.abrirGatewayId}
           onBack={() => setRoute({ name: "home" })}
-          onOpenVisita={(ref) => setRoute({ name: "visita", ref })}
-          onOpenVisitaFromEstoque={(ref, gatewayId) =>
+          onOpenVisita={(ref, voltarParaTab, gatewayId) =>
             setRoute({
               name: "visita",
               ref,
-              voltarPara: { name: "cliente", empresa: route.empresa, tab: "estoque", abrirGatewayId: gatewayId },
+              voltarPara: {
+                name: "cliente",
+                empresa: route.empresa,
+                tab: voltarParaTab,
+                abrirGatewayId: gatewayId,
+              },
             })
           }
           onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}

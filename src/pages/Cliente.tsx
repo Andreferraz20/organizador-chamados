@@ -12,8 +12,8 @@ interface Props {
   initialTab?: Tab;
   initialGatewayId?: string | null;
   onBack: () => void;
-  onOpenVisita: (ref: VisitaRef) => void;
-  onOpenVisitaFromEstoque: (ref: VisitaRef, gatewayId?: string) => void;
+  /** voltarParaTab garante que o botão de voltar da visita retorne pra aba de onde a navegação partiu. */
+  onOpenVisita: (ref: VisitaRef, voltarParaTab: Tab, gatewayId?: string) => void;
   onRenamed: (newEmpresa: string) => void;
 }
 
@@ -34,7 +34,6 @@ export function Cliente({
   initialGatewayId,
   onBack,
   onOpenVisita,
-  onOpenVisitaFromEstoque,
   onRenamed,
 }: Props) {
   const [tab, setTab] = useState<Tab>(initialTab ?? "dados");
@@ -81,12 +80,14 @@ export function Cliente({
 
       <div className="flex-1 overflow-y-auto">
         {tab === "dados" && <ClienteDadosForm empresa={empresa} onRenamed={onRenamed} />}
-        {tab === "detalhes" && <ClienteDetalhesForm empresa={empresa} onOpenVisita={onOpenVisita} />}
+        {tab === "detalhes" && (
+          <ClienteDetalhesForm empresa={empresa} onOpenVisita={(ref) => onOpenVisita(ref, "detalhes")} />
+        )}
         {tab === "visitas" && (
           <VisitasTecnicas
             empresa={empresa}
             tiposDeVisita={tiposDeVisita}
-            onOpenVisita={onOpenVisita}
+            onOpenVisita={(ref) => onOpenVisita(ref, "visitas")}
             initialMes={visitasInitialMes}
           />
         )}
@@ -97,7 +98,7 @@ export function Cliente({
           <ClienteEstoqueTecnico
             empresa={empresa}
             initialGatewayId={initialGatewayId}
-            onOpenVisita={onOpenVisitaFromEstoque}
+            onOpenVisita={(ref, gatewayId) => onOpenVisita(ref, "estoque", gatewayId)}
           />
         )}
       </div>

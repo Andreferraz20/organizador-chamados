@@ -462,10 +462,12 @@ export function registerFsHandlers(): void {
     await fs.writeFile(path.join(laudoDir, "laudo.json"), JSON.stringify(data, null, 2), "utf-8");
   });
 
+  // "Excluir laudo" apaga a visita inteira (fotos, vídeos e laudo) — pro técnico, uma
+  // visita sem laudo não faz sentido existir como registro à parte. A confirmação já
+  // acontece dentro do formulário do laudo, então aqui não há diálogo nativo.
   ipcMain.handle("laudo:delete", async (_event, ref: VisitaRef) => {
     const { root, tiposDeVisita } = await ensureContext();
-    const laudoDir = path.join(visitaPath(root, ref, tiposDeVisita), "laudo");
-    await fs.rm(laudoDir, { recursive: true, force: true });
+    await fs.rm(visitaPath(root, ref, tiposDeVisita), { recursive: true, force: true });
   });
 }
 
