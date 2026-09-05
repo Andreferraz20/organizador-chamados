@@ -6,13 +6,12 @@ import type { VisitaRef } from "../types";
 
 interface Props {
   visitaRef: VisitaRef;
-  acompanhantePadrao: string;
   onBack: () => void;
 }
 
 type Tab = "laudo" | "midia";
 
-export function Visita({ visitaRef, acompanhantePadrao, onBack }: Props) {
+export function Visita({ visitaRef, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("laudo");
 
   async function handleDelete() {
@@ -72,7 +71,7 @@ export function Visita({ visitaRef, acompanhantePadrao, onBack }: Props) {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {tab === "laudo" && <LaudoForm visitaRef={visitaRef} acompanhantePadrao={acompanhantePadrao} />}
+        {tab === "laudo" && <LaudoForm visitaRef={visitaRef} />}
         {tab === "midia" && <FileDropzone visitaRef={visitaRef} />}
       </div>
     </div>

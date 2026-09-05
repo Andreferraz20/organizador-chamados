@@ -152,6 +152,7 @@ export interface AppApi {
     get(ref: VisitaRef): Promise<LaudoData | null>;
     save(ref: VisitaRef, data: LaudoData): Promise<void>;
     generate(ref: VisitaRef, data: LaudoData): Promise<string>;
+    delete(ref: VisitaRef): Promise<void>;
   };
   media: {
     onRename(callback: (filePath: string) => void): () => void;

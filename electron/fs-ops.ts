@@ -461,6 +461,12 @@ export function registerFsHandlers(): void {
     await fs.mkdir(laudoDir, { recursive: true });
     await fs.writeFile(path.join(laudoDir, "laudo.json"), JSON.stringify(data, null, 2), "utf-8");
   });
+
+  ipcMain.handle("laudo:delete", async (_event, ref: VisitaRef) => {
+    const { root, tiposDeVisita } = await ensureContext();
+    const laudoDir = path.join(visitaPath(root, ref, tiposDeVisita), "laudo");
+    await fs.rm(laudoDir, { recursive: true, force: true });
+  });
 }
 
 /**

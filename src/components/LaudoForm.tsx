@@ -5,7 +5,6 @@ import type { LaudoData, VisitaRef } from "../types";
 
 interface Props {
   visitaRef: VisitaRef;
-  acompanhantePadrao: string;
 }
 
 const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
@@ -16,34 +15,36 @@ const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
   acompanhante: "",
 };
 
-export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
+export function LaudoForm({ visitaRef }: Props) {
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
   const [savingAction, setSavingAction] = useState<"save" | "generate" | null>(null);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     api.laudo.get(visitaRef).then((existing) => {
       if (cancelled) return;
-      if (existing) {
-        setForm({
-          numeroSerie: existing.numeroSerie ?? "",
-          laudoTecnico: existing.laudoTecnico ?? "",
-          pecasSolicitadas: existing.pecasSolicitadas ?? "",
-          materialEstoque: existing.materialEstoque ?? "",
-          acompanhante: existing.acompanhante ?? "",
-        });
-      } else {
-        setForm({ ...EMPTY, acompanhante: acompanhantePadrao });
-      }
+      setForm(
+        existing
+          ? {
+              numeroSerie: existing.numeroSerie ?? "",
+              laudoTecnico: existing.laudoTecnico ?? "",
+              pecasSolicitadas: existing.pecasSolicitadas ?? "",
+              materialEstoque: existing.materialEstoque ?? "",
+              acompanhante: existing.acompanhante ?? "",
+            }
+          : EMPTY,
+      );
       setLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, [visitaRef, acompanhantePadrao]);
+  }, [visitaRef]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -73,16 +74,28 @@ export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
     }
   }
 
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await api.laudo.delete(visitaRef);
+      setForm(EMPTY);
+      setConfirmDelete(false);
+      setSavedMessage("Laudo excluído.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   if (loading) {
     return <p className="text-sm text-slate-400 dark:text-slate-500">Carregando laudo…</p>;
   }
 
-  const fields: { key: keyof typeof form; label: string; multiline?: boolean; rows?: number; placeholder?: string }[] = [
-    { key: "numeroSerie", label: "Número de Série dos Equipamentos", multiline: true, rows: 6 },
-    { key: "laudoTecnico", label: "Laudo Técnico", multiline: true, rows: 6 },
-    { key: "pecasSolicitadas", label: "Peças Solicitadas", multiline: true, rows: 3 },
-    { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?", multiline: true, rows: 3 },
-    { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica", multiline: true, rows: 3 },
+  const fields: { key: keyof typeof form; label: string; multiline?: boolean; placeholder?: string }[] = [
+    { key: "numeroSerie", label: "Número de Série dos Equipamentos", multiline: true },
+    { key: "laudoTecnico", label: "Laudo Técnico", multiline: true },
+    { key: "pecasSolicitadas", label: "Peças Solicitadas", multiline: true },
+    { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?", multiline: true },
+    { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica", multiline: true },
   ];
 
   return (
@@ -94,7 +107,7 @@ export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
             <AutoGrowTextarea
               value={form[f.key]}
               onChange={(e) => update(f.key, e.target.value)}
-              rows={f.rows ?? 3}
+              rows={3}
               placeholder={f.placeholder}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
             />
@@ -123,8 +136,40 @@ export function LaudoForm({ visitaRef, acompanhantePadrao }: Props) {
         >
           {savingAction === "generate" ? "Gerando…" : "Gerar PDF"}
         </button>
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40"
+        >
+          Excluir laudo
+        </button>
         {savedMessage && <span className="text-sm text-green-600 dark:text-green-400">{savedMessage}</span>}
       </div>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">Excluir este laudo?</h3>
+            <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+              Isso apaga o texto e o PDF gerado desse laudo. Não é possível desfazer.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "Excluindo…" : "Excluir"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

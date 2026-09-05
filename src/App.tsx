@@ -80,7 +80,6 @@ export default function App() {
   }
 
   const tiposDeVisita = (settings?.tiposDeVisita ?? []).map((t) => t.label);
-  const acompanhantePadrao = [settings?.tecnicoNome, settings?.tecnicoEmpresa].filter(Boolean).join(" - ");
 
   return (
     <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
@@ -141,7 +140,6 @@ export default function App() {
       {route.name === "visita" && (
         <Visita
           visitaRef={route.ref}
-          acompanhantePadrao={acompanhantePadrao}
           onBack={() => setRoute(route.voltarPara ?? { name: "cliente", empresa: route.ref.empresa })}
         />
       )}

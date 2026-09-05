@@ -42,6 +42,7 @@ contextBridge.exposeInMainWorld("app", {
     get: (ref: unknown) => ipcRenderer.invoke("laudo:get", ref),
     save: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:save", ref, data),
     generate: (ref: unknown, data: unknown) => ipcRenderer.invoke("laudo:generate", ref, data),
+    delete: (ref: unknown) => ipcRenderer.invoke("laudo:delete", ref),
   },
   media: {
     onRename: (callback: (filePath: string) => void) => {
