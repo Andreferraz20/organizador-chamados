@@ -464,15 +464,6 @@ export function registerFsHandlers(): void {
     event.sender.startDrag({ file: filePaths[0], files: filePaths, icon });
   });
 
-  ipcMain.handle("arquivos:openInExplorer", async (_event, ref: VisitaRef) => {
-    const { root, tiposDeVisita } = await ensureContext();
-    const target = visitaPath(root, ref, tiposDeVisita);
-    if (!fsSync.existsSync(target)) {
-      await fs.mkdir(target, { recursive: true });
-    }
-    await shell.openPath(target);
-  });
-
   ipcMain.handle("laudo:get", async (_event, ref: VisitaRef) => {
     const { root, tiposDeVisita } = await ensureContext();
     const jsonPath = path.join(visitaPath(root, ref, tiposDeVisita), "laudo", "laudo.json");

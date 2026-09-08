@@ -34,7 +34,6 @@ contextBridge.exposeInMainWorld("app", {
     remove: (ref: unknown, fileName: string) => ipcRenderer.invoke("arquivos:remove", ref, fileName),
     rename: (ref: unknown, oldName: string, newName: string) =>
       ipcRenderer.invoke("arquivos:rename", ref, oldName, newName),
-    openInExplorer: (ref: unknown) => ipcRenderer.invoke("arquivos:openInExplorer", ref),
     openFile: (filePath: string) => ipcRenderer.invoke("arquivos:openFile", filePath),
     showInFolder: (filePath: string) => ipcRenderer.invoke("arquivos:showInFolder", filePath),
     startDrag: (filePaths: string[]) => ipcRenderer.send("arquivos:startDrag", filePaths),
