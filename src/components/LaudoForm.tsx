@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { api, partsToDate } from "../lib/api";
 import { AutoGrowTextarea } from "./AutoGrowTextarea";
 import type { LaudoData, VisitaRef } from "../types";
@@ -6,6 +6,11 @@ import type { LaudoData, VisitaRef } from "../types";
 interface Props {
   visitaRef: VisitaRef;
   onDeleted: () => void;
+}
+
+export interface LaudoFormHandle {
+  /** Salva o rascunho do laudo. Exposto pra permitir salvar mesmo com a aba "Fotos e Vídeos" aberta. */
+  save: () => Promise<void>;
 }
 
 const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
@@ -16,7 +21,7 @@ const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
   acompanhante: "",
 };
 
-export function LaudoForm({ visitaRef, onDeleted }: Props) {
+export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({ visitaRef, onDeleted }, ref) {
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
   const [savingAction, setSavingAction] = useState<"save" | "generate" | null>(null);
@@ -84,6 +89,10 @@ export function LaudoForm({ visitaRef, onDeleted }: Props) {
       setDeleting(false);
     }
   }
+
+  useImperativeHandle(ref, () => ({
+    save: () => persist(false),
+  }));
 
   if (loading) {
     return <p className="text-sm text-slate-400 dark:text-slate-500">Carregando laudo…</p>;
@@ -171,4 +180,4 @@ export function LaudoForm({ visitaRef, onDeleted }: Props) {
       )}
     </div>
   );
-}
+});

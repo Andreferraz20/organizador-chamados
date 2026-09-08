@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "../lib/api";
 import { FileDropzone } from "../components/FileDropzone";
-import { LaudoForm } from "../components/LaudoForm";
+import { LaudoForm, type LaudoFormHandle } from "../components/LaudoForm";
 import type { VisitaRef } from "../types";
 
 interface Props {
@@ -13,10 +13,25 @@ type Tab = "laudo" | "midia";
 
 export function Visita({ visitaRef, onBack }: Props) {
   const [tab, setTab] = useState<Tab>("laudo");
+  const laudoRef = useRef<LaudoFormHandle>(null);
+  const [savingLaudo, setSavingLaudo] = useState(false);
+  const [laudoSalvo, setLaudoSalvo] = useState(false);
 
   async function handleDelete() {
     const deleted = await api.visitas.delete(visitaRef);
     if (deleted) onBack();
+  }
+
+  async function handleSalvarLaudo() {
+    setSavingLaudo(true);
+    setLaudoSalvo(false);
+    try {
+      await laudoRef.current?.save();
+      setLaudoSalvo(true);
+      setTimeout(() => setLaudoSalvo(false), 1500);
+    } finally {
+      setSavingLaudo(false);
+    }
   }
 
   return (
@@ -34,6 +49,15 @@ export function Visita({ visitaRef, onBack }: Props) {
           </h1>
         </div>
         <div className="flex items-center gap-2">
+          {laudoSalvo && <span className="text-sm text-green-600 dark:text-green-400">Laudo salvo.</span>}
+          <button
+            onClick={handleSalvarLaudo}
+            disabled={savingLaudo}
+            title="Salva o rascunho do laudo, mesmo com a aba de Fotos e Vídeos aberta"
+            className="rounded-md border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/40"
+          >
+            {savingLaudo ? "Salvando…" : "Salvar Laudo"}
+          </button>
           <button
             onClick={() => api.arquivos.openInExplorer(visitaRef)}
             className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -70,9 +94,17 @@ export function Visita({ visitaRef, onBack }: Props) {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {tab === "laudo" && <LaudoForm visitaRef={visitaRef} onDeleted={onBack} />}
-        {tab === "midia" && <FileDropzone visitaRef={visitaRef} />}
+      {/*
+        As duas abas ficam sempre montadas (só escondidas via CSS) em vez de
+        desmontadas na troca de aba. Antes, trocar pra "Fotos e Vídeos" sem
+        salvar destruía o texto do laudo ainda não salvo, causando perda de
+        dados ao voltar depois.
+      */}
+      <div className={`flex-1 overflow-y-auto ${tab === "laudo" ? "" : "hidden"}`}>
+        <LaudoForm ref={laudoRef} visitaRef={visitaRef} onDeleted={onBack} />
+      </div>
+      <div className={`flex-1 overflow-y-auto ${tab === "midia" ? "" : "hidden"}`}>
+        <FileDropzone visitaRef={visitaRef} />
       </div>
     </div>
   );
