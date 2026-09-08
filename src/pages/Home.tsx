@@ -16,40 +16,28 @@ interface VisitaResumoGlobal {
   tipoVisita: string;
 }
 
-function toISODate(date: Date): string {
-  const ano = date.getFullYear();
-  const mes = String(date.getMonth() + 1).padStart(2, "0");
-  const dia = String(date.getDate()).padStart(2, "0");
-  return `${ano}-${mes}-${dia}`;
+/** Palavras que não flexionam no plural (preposições, artigos, conjunções). */
+const PALAVRAS_INVARIAVEIS = new Set([
+  "de", "da", "do", "das", "dos", "e", "em", "a", "o", "as", "os", "com", "para", "por",
+]);
+
+function pluralizarPalavra(palavra: string): string {
+  const minuscula = palavra.toLowerCase();
+  if (minuscula.endsWith("ção")) return palavra.slice(0, -3) + "ções";
+  if (minuscula.endsWith("ão")) return palavra.slice(0, -2) + "ões";
+  if (/[rz]$/i.test(palavra)) return palavra + "es";
+  if (minuscula.endsWith("m")) return palavra.slice(0, -1) + "ns";
+  if (minuscula.endsWith("l")) return palavra.slice(0, -1) + "is";
+  if (/[aeiouáéíóúâêôãõ]$/i.test(palavra)) return palavra + "s";
+  return palavra + "s";
 }
 
-function presetHoje(): [string, string] {
-  const hoje = toISODate(new Date());
-  return [hoje, hoje];
-}
-
-function presetSemana(): [string, string] {
-  const agora = new Date();
-  const offsetSegunda = (agora.getDay() + 6) % 7;
-  const segunda = new Date(agora);
-  segunda.setDate(agora.getDate() - offsetSegunda);
-  const domingo = new Date(segunda);
-  domingo.setDate(segunda.getDate() + 6);
-  return [toISODate(segunda), toISODate(domingo)];
-}
-
-function presetMes(): [string, string] {
-  const agora = new Date();
-  const inicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
-  const fim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
-  return [toISODate(inicio), toISODate(fim)];
-}
-
-function presetAno(): [string, string] {
-  const agora = new Date();
-  const inicio = new Date(agora.getFullYear(), 0, 1);
-  const fim = new Date(agora.getFullYear(), 11, 31);
-  return [toISODate(inicio), toISODate(fim)];
+/** Pluraliza um tipo de visita configurado livremente pelo técnico (ex: "Avaliação Técnica" -> "Avaliações Técnicas"). */
+function pluralizarTipo(label: string): string {
+  return label
+    .split(" ")
+    .map((palavra) => (PALAVRAS_INVARIAVEIS.has(palavra.toLowerCase()) ? palavra : pluralizarPalavra(palavra)))
+    .join(" ");
 }
 
 export function Home({ onBack, onOpenCliente }: Props) {
@@ -97,12 +85,6 @@ export function Home({ onBack, onOpenCliente }: Props) {
 
   function toggleTipoSelecionado(tipo: string) {
     setTiposSelecionados((prev) => (prev.includes(tipo) ? prev.filter((t) => t !== tipo) : [...prev, tipo]));
-  }
-
-  function aplicarPreset(preset: () => [string, string]) {
-    const [inicio, fim] = preset();
-    setDataInicio(inicio);
-    setDataFim(fim);
   }
 
   const filtroAtivo = Boolean(dataInicio && dataFim);
@@ -158,9 +140,9 @@ export function Home({ onBack, onOpenCliente }: Props) {
           className="w-full max-w-md rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
         <button
-          onClick={() => setShowFiltros((v) => !v)}
+          onClick={() => setShowFiltros(true)}
           className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium ${
-            showFiltros
+            filtroAtivo
               ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-900/30 dark:text-blue-300"
               : "border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           }`}
@@ -168,109 +150,121 @@ export function Home({ onBack, onOpenCliente }: Props) {
           Filtros
           {filtroAtivo && <span className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />}
         </button>
-        {filtroAtivo && (
-          <button
-            onClick={() => {
-              setDataInicio("");
-              setDataFim("");
-              setTiposSelecionados([]);
-            }}
-            className="text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
-          >
-            Limpar filtro
-          </button>
-        )}
       </div>
 
       {showFiltros && (
-        <div className="mb-6 max-w-2xl space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-              Filtrar por Data
-            </label>
-            <div className="mb-2 flex flex-wrap gap-2">
-              {(
-                [
-                  ["Hoje", presetHoje],
-                  ["Esta Semana", presetSemana],
-                  ["Este Mês", presetMes],
-                  ["Este Ano", presetAno],
-                ] as [string, () => [string, string]][]
-              ).map(([label, preset]) => (
-                <button
-                  key={label}
-                  onClick={() => aplicarPreset(preset)}
-                  className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-wrap items-end gap-3">
-              <div>
-                <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Do dia</label>
-                <input
-                  type="date"
-                  value={dataInicio}
-                  onChange={(e) => setDataInicio(e.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Até o dia</label>
-                <input
-                  type="date"
-                  value={dataFim}
-                  onChange={(e) => setDataFim(e.target.value)}
-                  className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
-            </div>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+            <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-100">Filtrar Clientes</h3>
 
-          {filtroAtivo && (
-            <div>
-              <label className="mb-2 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                Tipos de Visita
-              </label>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                  <input
-                    type="checkbox"
-                    checked={tiposSelecionados.length === 0}
-                    onChange={() => setTiposSelecionados([])}
-                  />
-                  Todas
+            <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-1">
+              <div>
+                <label className="mb-2 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                  Filtrar por Data
                 </label>
-                {tiposDeVisita.map((tipo) => (
-                  <label key={tipo} className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Do dia</label>
                     <input
-                      type="checkbox"
-                      checked={tiposSelecionados.includes(tipo)}
-                      onChange={() => toggleTipoSelecionado(tipo)}
+                      type="date"
+                      value={dataInicio}
+                      onChange={(e) => setDataInicio(e.target.value)}
+                      className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 [&::-webkit-calendar-picker-indicator]:ml-1 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded [&::-webkit-calendar-picker-indicator]:bg-blue-100 [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:bg-blue-200"
                     />
-                    {tipo}
-                  </label>
-                ))}
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-slate-500 dark:text-slate-400">Até o dia</label>
+                    <input
+                      type="date"
+                      value={dataFim}
+                      onChange={(e) => setDataFim(e.target.value)}
+                      className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 [&::-webkit-calendar-picker-indicator]:ml-1 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded [&::-webkit-calendar-picker-indicator]:bg-blue-100 [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:bg-blue-200"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {visitasCarregadas && (
-                <div className="mt-3 space-y-1 border-t border-slate-200 pt-3 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
-                  {tiposParaContagem.map((tipo) => (
-                    <p key={tipo}>
-                      Quantidade de {tipo} feitas nesse filtro:{" "}
-                      <span className="font-semibold">
-                        {visitasNoPeriodo.filter((v) => v.tipoVisita === tipo).length}
-                      </span>
-                    </p>
-                  ))}
-                  <p className="font-medium text-slate-800 dark:text-slate-100">
-                    Total no período: {visitasFiltradas.length} visita(s) em {empresasComVisita.size} cliente(s)
-                  </p>
+              {filtroAtivo && (
+                <div>
+                  <label className="mb-2 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                    Tipos de Visita
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setTiposSelecionados([])}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                        tiposSelecionados.length === 0
+                          ? "border-blue-500 bg-blue-100 text-blue-700 dark:border-blue-500 dark:bg-blue-900/40 dark:text-blue-300"
+                          : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      Todas
+                    </button>
+                    {tiposDeVisita.map((tipo) => (
+                      <button
+                        key={tipo}
+                        onClick={() => toggleTipoSelecionado(tipo)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                          tiposSelecionados.includes(tipo)
+                            ? "border-blue-500 bg-blue-100 text-blue-700 dark:border-blue-500 dark:bg-blue-900/40 dark:text-blue-300"
+                            : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        {tipo}
+                      </button>
+                    ))}
+                  </div>
+
+                  {visitasCarregadas && (
+                    <div className="mt-4 space-y-1.5 border-t border-slate-200 pt-3 dark:border-slate-700">
+                      {tiposParaContagem.map((tipo) => (
+                        <div
+                          key={tipo}
+                          className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-1.5 text-sm dark:bg-slate-900"
+                        >
+                          <span className="text-slate-600 dark:text-slate-300">
+                            Quantidade de {pluralizarTipo(tipo)}
+                          </span>
+                          <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                            {visitasNoPeriodo.filter((v) => v.tipoVisita === tipo).length}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex items-center justify-between rounded-md bg-blue-50 px-3 py-1.5 text-sm font-medium dark:bg-blue-900/20">
+                        <span className="text-blue-800 dark:text-blue-200">Total no período</span>
+                        <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                          {visitasFiltradas.length} em {empresasComVisita.size} cliente(s)
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
+
+            <div className="mt-4 flex items-center justify-between">
+              {filtroAtivo ? (
+                <button
+                  onClick={() => {
+                    setDataInicio("");
+                    setDataFim("");
+                    setTiposSelecionados([]);
+                  }}
+                  className="text-xs font-medium text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                >
+                  Limpar filtro
+                </button>
+              ) : (
+                <span />
+              )}
+              <button
+                onClick={() => setShowFiltros(false)}
+                className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
