@@ -69,9 +69,14 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
     api.clienteDados.get(empresa).then((existing) => {
       if (cancelled) return;
       // Merge por cima do padrão pra clientes salvos antes de campos novos existirem
-      // (ex: numerosSerie, quantidadeBocas) não quebrarem o formulário.
+      // (ex: numerosSerie, quantidadeBocas) não quebrarem o formulário. Máquinas
+      // cadastradas antes do campo "numeração" existir ganham o prefixo do tipo
+      // já selecionado, em vez de aparecerem em branco.
       const merged = { ...emptyDados(empresa), ...existing };
-      merged.numerosSerie = merged.numerosSerie.map((n) => ({ ...n, numeracao: n.numeracao ?? "" }));
+      merged.numerosSerie = merged.numerosSerie.map((n) => ({
+        ...n,
+        numeracao: n.numeracao || PREFIXO_POR_TIPO[n.tipoMaquina] || "",
+      }));
       setForm(merged);
       setLoading(false);
     });
