@@ -20,8 +20,31 @@ const BOCAS_POR_TIPO: Record<string, number> = {
   "Secadora Dupla": 2,
 };
 
+/** Prefixo da numeração da máquina na lavanderia, específico de cada tipo. */
+export const PREFIXO_POR_TIPO: Record<string, string> = {
+  "Lavadora Individual": "L",
+  "Secadora Individual": "S",
+  Topload: "TOP",
+  "Lava/Seca Stack": "ST",
+  "Secadora Dupla": "SD",
+};
+
 export function calcularBocas(numerosSerie: NumeroSerie[]): number {
   return numerosSerie.reduce((total, ns) => total + (BOCAS_POR_TIPO[ns.tipoMaquina] ?? 0), 0);
+}
+
+/**
+ * Ao trocar o tipo de máquina, atualiza o prefixo da numeração mantendo o que o
+ * técnico já tiver digitado depois dele (ex: troca de "L" pra "ST01" -> "ST01").
+ */
+export function trocarTipoNaNumeracao(numeracaoAtual: string, tipoAntigo: string, tipoNovo: string): string {
+  const prefixoAntigo = PREFIXO_POR_TIPO[tipoAntigo] ?? "";
+  const prefixoNovo = PREFIXO_POR_TIPO[tipoNovo] ?? "";
+  if (!numeracaoAtual || numeracaoAtual === prefixoAntigo) return prefixoNovo;
+  if (prefixoAntigo && numeracaoAtual.startsWith(prefixoAntigo)) {
+    return (prefixoNovo + numeracaoAtual.slice(prefixoAntigo.length)).slice(0, 5);
+  }
+  return numeracaoAtual;
 }
 
 interface Props {
@@ -47,7 +70,9 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
       if (cancelled) return;
       // Merge por cima do padrão pra clientes salvos antes de campos novos existirem
       // (ex: numerosSerie, quantidadeBocas) não quebrarem o formulário.
-      setForm({ ...emptyDados(empresa), ...existing });
+      const merged = { ...emptyDados(empresa), ...existing };
+      merged.numerosSerie = merged.numerosSerie.map((n) => ({ ...n, numeracao: n.numeracao ?? "" }));
+      setForm(merged);
       setLoading(false);
     });
     return () => {
@@ -90,12 +115,24 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
   function addNumeroSerie() {
     setForm((prev) => ({
       ...prev,
-      numerosSerie: [...prev.numerosSerie, { numero: "", tipoMaquina: "" }],
+      numerosSerie: [...prev.numerosSerie, { numero: "", tipoMaquina: "", numeracao: "" }],
     }));
   }
 
   function removeNumeroSerie(index: number) {
     setForm((prev) => ({ ...prev, numerosSerie: prev.numerosSerie.filter((_, i) => i !== index) }));
+  }
+
+  function updateTipoMaquina(index: number, novoTipo: string) {
+    setForm((prev) => ({
+      ...prev,
+      numerosSerie: prev.numerosSerie.map((n, i) =>
+        i === index
+          ? { ...n, tipoMaquina: novoTipo, numeracao: trocarTipoNaNumeracao(n.numeracao, n.tipoMaquina, novoTipo) }
+          : n,
+      ),
+    }));
+    setSavedMessage(null);
   }
 
   async function handleSave() {
@@ -190,6 +227,14 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                 {form.numerosSerie.map((ns, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <input
+                      value={ns.numeracao}
+                      onChange={(e) => updateNumeroSerie(index, "numeracao", e.target.value.toUpperCase())}
+                      maxLength={5}
+                      title="Numeração da máquina na lavanderia"
+                      placeholder="Nº"
+                      className="w-16 shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    />
+                    <input
                       value={ns.numero}
                       onChange={(e) => updateNumeroSerie(index, "numero", e.target.value)}
                       placeholder="Número de série"
@@ -197,7 +242,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                     />
                     <select
                       value={ns.tipoMaquina}
-                      onChange={(e) => updateNumeroSerie(index, "tipoMaquina", e.target.value)}
+                      onChange={(e) => updateTipoMaquina(index, e.target.value)}
                       className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     >
                       <option value="">Tipo de máquina</option>

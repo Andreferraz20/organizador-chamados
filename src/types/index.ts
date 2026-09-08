@@ -49,6 +49,7 @@ export interface Pessoa {
 export interface NumeroSerie {
   numero: string;
   tipoMaquina: string;
+  numeracao: string;
 }
 
 export interface ClienteDados {

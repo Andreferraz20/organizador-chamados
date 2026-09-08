@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { EmptyHint } from "../components/EmptyHint";
-import { TIPOS_MAQUINA, calcularBocas } from "../components/ClienteDadosForm";
+import { TIPOS_MAQUINA, calcularBocas, trocarTipoNaNumeracao } from "../components/ClienteDadosForm";
 import type { NumeroSerie } from "../types";
 
 interface Props {
@@ -146,11 +146,21 @@ function AdicionarClienteModal({
   const [error, setError] = useState<string | null>(null);
 
   function addNumeroSerie() {
-    setNumerosSerie((prev) => [...prev, { numero: "", tipoMaquina: "" }]);
+    setNumerosSerie((prev) => [...prev, { numero: "", tipoMaquina: "", numeracao: "" }]);
   }
 
   function updateNumeroSerie(index: number, field: keyof NumeroSerie, value: string) {
     setNumerosSerie((prev) => prev.map((n, i) => (i === index ? { ...n, [field]: value } : n)));
+  }
+
+  function updateTipoMaquina(index: number, novoTipo: string) {
+    setNumerosSerie((prev) =>
+      prev.map((n, i) =>
+        i === index
+          ? { ...n, tipoMaquina: novoTipo, numeracao: trocarTipoNaNumeracao(n.numeracao, n.tipoMaquina, novoTipo) }
+          : n,
+      ),
+    );
   }
 
   function removeNumeroSerie(index: number) {
@@ -237,6 +247,14 @@ function AdicionarClienteModal({
                 {numerosSerie.map((ns, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <input
+                      value={ns.numeracao}
+                      onChange={(e) => updateNumeroSerie(index, "numeracao", e.target.value.toUpperCase())}
+                      maxLength={5}
+                      title="Numeração da máquina na lavanderia"
+                      placeholder="Nº"
+                      className="w-16 shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    />
+                    <input
                       value={ns.numero}
                       onChange={(e) => updateNumeroSerie(index, "numero", e.target.value)}
                       placeholder="Número de série"
@@ -244,7 +262,7 @@ function AdicionarClienteModal({
                     />
                     <select
                       value={ns.tipoMaquina}
-                      onChange={(e) => updateNumeroSerie(index, "tipoMaquina", e.target.value)}
+                      onChange={(e) => updateTipoMaquina(index, e.target.value)}
                       className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     >
                       <option value="">Tipo de máquina</option>

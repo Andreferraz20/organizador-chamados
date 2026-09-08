@@ -39,6 +39,7 @@ interface Pessoa {
 interface NumeroSerie {
   numero: string;
   tipoMaquina: string;
+  numeracao: string;
 }
 
 interface ClienteDados {
