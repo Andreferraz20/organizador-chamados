@@ -32,6 +32,14 @@ function pluralizarPalavra(palavra: string): string {
   return palavra + "s";
 }
 
+function hojeISO(): string {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 /** Pluraliza um tipo de visita configurado livremente pelo técnico (ex: "Avaliação Técnica" -> "Avaliações Técnicas"). */
 function pluralizarTipo(label: string): string {
   return label
@@ -168,6 +176,7 @@ export function Home({ onBack, onOpenCliente }: Props) {
                     <input
                       type="date"
                       value={dataInicio}
+                      max={hojeISO()}
                       onChange={(e) => setDataInicio(e.target.value)}
                       className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 [&::-webkit-calendar-picker-indicator]:ml-1 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded [&::-webkit-calendar-picker-indicator]:bg-blue-100 [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:bg-blue-200"
                     />
@@ -177,6 +186,7 @@ export function Home({ onBack, onOpenCliente }: Props) {
                     <input
                       type="date"
                       value={dataFim}
+                      max={hojeISO()}
                       onChange={(e) => setDataFim(e.target.value)}
                       className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 [&::-webkit-calendar-picker-indicator]:ml-1 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded [&::-webkit-calendar-picker-indicator]:bg-blue-100 [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:opacity-100 dark:[&::-webkit-calendar-picker-indicator]:bg-blue-200"
                     />
@@ -222,9 +232,7 @@ export function Home({ onBack, onOpenCliente }: Props) {
                           key={tipo}
                           className="flex items-center justify-between rounded-md bg-slate-50 px-3 py-1.5 text-sm dark:bg-slate-900"
                         >
-                          <span className="text-slate-600 dark:text-slate-300">
-                            Quantidade de {pluralizarTipo(tipo)}
-                          </span>
+                          <span className="text-slate-600 dark:text-slate-300">{pluralizarTipo(tipo)}</span>
                           <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
                             {visitasNoPeriodo.filter((v) => v.tipoVisita === tipo).length}
                           </span>

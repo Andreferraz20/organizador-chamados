@@ -357,13 +357,15 @@ export function registerFsHandlers(): void {
     const comVisitas = await Promise.all(
       meses.map(async (mes) => ((await listSubdirectories(path.join(empresaDir, mes))).length > 0 ? mes : null)),
     );
-    return comVisitas.filter((mes): mes is string => mes !== null);
+    // Mês mais recente primeiro (listSubdirectories devolve em ordem crescente).
+    return comVisitas.filter((mes): mes is string => mes !== null).reverse();
   });
 
   ipcMain.handle("visitas:listVisitas", async (_event, empresa: string, mes: string) => {
     const { root, tiposDeVisita } = await ensureContext();
     const folders = await listSubdirectories(path.join(root, sanitizeName(empresa), mes));
-    return folders.map((f) => parseVisitaFolderName(f, tiposDeVisita));
+    // Visita mais recente primeiro, mesmo critério da lista de meses.
+    return folders.reverse().map((f) => parseVisitaFolderName(f, tiposDeVisita));
   });
 
   ipcMain.handle("visitas:listTodas", async () => {
