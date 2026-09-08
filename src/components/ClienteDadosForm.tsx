@@ -53,7 +53,7 @@ interface Props {
 }
 
 function emptyDados(empresa: string): ClienteDados {
-  return { nome: empresa, endereco: "", quantidadeBocas: "", numerosSerie: [], pessoas: [] };
+  return { nome: empresa, endereco: "", codigoLavanderia: "", quantidadeBocas: "", numerosSerie: [], pessoas: [] };
 }
 
 export function ClienteDadosForm({ empresa, onRenamed }: Props) {
@@ -193,6 +193,17 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
           <input
             value={form.endereco}
             onChange={(e) => update("endereco", e.target.value.toUpperCase())}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            Código da Lavanderia
+          </label>
+          <input
+            value={form.codigoLavanderia}
+            onChange={(e) => update("codigoLavanderia", e.target.value.toUpperCase())}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>

@@ -55,6 +55,7 @@ export interface NumeroSerie {
 export interface ClienteDados {
   nome: string;
   endereco: string;
+  codigoLavanderia: string;
   quantidadeBocas: string;
   numerosSerie: NumeroSerie[];
   pessoas: Pessoa[];
@@ -135,6 +136,7 @@ export interface AppApi {
   visitas: {
     listMeses(empresa: string): Promise<string[]>;
     listVisitas(empresa: string, mes: string): Promise<{ dia: string; tipoVisita: string }[]>;
+    listTodas(): Promise<{ empresa: string; data: string; tipoVisita: string }[]>;
     create(ref: VisitaRef): Promise<void>;
     delete(ref: VisitaRef): Promise<boolean>;
   };

@@ -45,6 +45,7 @@ interface NumeroSerie {
 interface ClienteDados {
   nome: string;
   endereco: string;
+  codigoLavanderia: string;
   quantidadeBocas: string;
   numerosSerie: NumeroSerie[];
   pessoas: Pessoa[];
@@ -349,13 +350,38 @@ export function registerFsHandlers(): void {
 
   ipcMain.handle("visitas:listMeses", async (_event, empresa: string) => {
     const root = await ensureRootFolder();
-    return listSubdirectories(path.join(root, sanitizeName(empresa)));
+    const empresaDir = path.join(root, sanitizeName(empresa));
+    const meses = await listSubdirectories(empresaDir);
+    // Um mês sem nenhuma visita dentro (ex: a última visita dele foi apagada) não deve
+    // continuar aparecendo na lista, mesmo que a pasta vazia ainda exista no disco.
+    const comVisitas = await Promise.all(
+      meses.map(async (mes) => ((await listSubdirectories(path.join(empresaDir, mes))).length > 0 ? mes : null)),
+    );
+    return comVisitas.filter((mes): mes is string => mes !== null);
   });
 
   ipcMain.handle("visitas:listVisitas", async (_event, empresa: string, mes: string) => {
     const { root, tiposDeVisita } = await ensureContext();
     const folders = await listSubdirectories(path.join(root, sanitizeName(empresa), mes));
     return folders.map((f) => parseVisitaFolderName(f, tiposDeVisita));
+  });
+
+  ipcMain.handle("visitas:listTodas", async () => {
+    const { root, tiposDeVisita } = await ensureContext();
+    const empresas = (await listSubdirectories(root)).filter((d) => !RESERVED_ROOT_FOLDERS.includes(d));
+    const resultados: { empresa: string; data: string; tipoVisita: string }[] = [];
+    for (const empresa of empresas) {
+      const meses = await listSubdirectories(path.join(root, empresa));
+      for (const mes of meses) {
+        const folders = await listSubdirectories(path.join(root, empresa, mes));
+        for (const folder of folders) {
+          const { dia, tipoVisita } = parseVisitaFolderName(folder, tiposDeVisita);
+          if (!dia) continue;
+          resultados.push({ empresa, data: `${mes}-${dia}`, tipoVisita });
+        }
+      }
+    }
+    return resultados;
   });
 
   ipcMain.handle("visitas:create", async (_event, ref: VisitaRef) => {

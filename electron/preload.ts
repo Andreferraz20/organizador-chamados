@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld("app", {
   visitas: {
     listMeses: (empresa: string) => ipcRenderer.invoke("visitas:listMeses", empresa),
     listVisitas: (empresa: string, mes: string) => ipcRenderer.invoke("visitas:listVisitas", empresa, mes),
+    listTodas: () => ipcRenderer.invoke("visitas:listTodas"),
     create: (ref: unknown) => ipcRenderer.invoke("visitas:create", ref),
     delete: (ref: unknown) => ipcRenderer.invoke("visitas:delete", ref),
   },
