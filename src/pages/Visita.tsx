@@ -48,7 +48,7 @@ export function Visita({ visitaRef, onBack }: Props) {
             {visitaRef.dia}/{visitaRef.mes} — {visitaRef.tipoVisita}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="mr-12 flex items-center gap-2">
           {laudoSalvo && <span className="text-sm text-green-600 dark:text-green-400">Laudo salvo.</span>}
           <button
             onClick={handleSalvarLaudo}
