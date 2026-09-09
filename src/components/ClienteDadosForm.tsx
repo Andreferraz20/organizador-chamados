@@ -62,6 +62,8 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,6 +128,17 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
 
   function removeNumeroSerie(index: number) {
     setForm((prev) => ({ ...prev, numerosSerie: prev.numerosSerie.filter((_, i) => i !== index) }));
+  }
+
+  function moveNumeroSerie(from: number, to: number) {
+    if (from === to) return;
+    setForm((prev) => {
+      const numerosSerie = [...prev.numerosSerie];
+      const [movido] = numerosSerie.splice(from, 1);
+      numerosSerie.splice(to, 0, movido);
+      return { ...prev, numerosSerie };
+    });
+    setSavedMessage(null);
   }
 
   function updateTipoMaquina(index: number, novoTipo: string) {
@@ -239,9 +252,48 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
             {form.numerosSerie.length === 0 ? (
               <EmptyHint text="Nenhum número de série adicionado." />
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {form.numerosSerie.map((ns, index) => (
-                  <div key={index} className="flex items-center gap-2">
+                  <div
+                    key={index}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (dragIndex !== null) setDragOverIndex(index);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragIndex !== null) moveNumeroSerie(dragIndex, index);
+                      setDragIndex(null);
+                      setDragOverIndex(null);
+                    }}
+                    className={`flex items-center gap-2 rounded-md p-1 transition-colors ${
+                      dragOverIndex === index && dragIndex !== null && dragIndex !== index
+                        ? "bg-blue-50 dark:bg-blue-950/30"
+                        : ""
+                    }`}
+                  >
+                    <div
+                      draggable
+                      onDragStart={(e) => {
+                        setDragIndex(index);
+                        e.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragEnd={() => {
+                        setDragIndex(null);
+                        setDragOverIndex(null);
+                      }}
+                      title="Arraste para reordenar"
+                      className="flex h-9 w-5 shrink-0 cursor-grab items-center justify-center text-slate-300 hover:text-slate-500 active:cursor-grabbing dark:text-slate-600 dark:hover:text-slate-400"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                        <circle cx="9" cy="6" r="1.4" />
+                        <circle cx="15" cy="6" r="1.4" />
+                        <circle cx="9" cy="12" r="1.4" />
+                        <circle cx="15" cy="12" r="1.4" />
+                        <circle cx="9" cy="18" r="1.4" />
+                        <circle cx="15" cy="18" r="1.4" />
+                      </svg>
+                    </div>
                     <input
                       value={ns.numeracao}
                       onChange={(e) => updateNumeroSerie(index, "numeracao", e.target.value.toUpperCase())}

@@ -131,4 +131,9 @@ export function registerDocumentacaoHandlers(): void {
       return listDocs(categoria);
     },
   );
+
+  ipcMain.handle("documentacao:delete", async (_event, categoria: DocCategoria, arquivo: string) => {
+    await fs.rm(path.join(categoriaDir(categoria), arquivo), { force: true });
+    return listDocs(categoria);
+  });
 }

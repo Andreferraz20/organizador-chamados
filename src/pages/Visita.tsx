@@ -7,11 +7,12 @@ import type { VisitaRef } from "../types";
 interface Props {
   visitaRef: VisitaRef;
   onBack: () => void;
+  onGoToClientes: () => void;
 }
 
 type Tab = "laudo" | "midia";
 
-export function Visita({ visitaRef, onBack }: Props) {
+export function Visita({ visitaRef, onBack, onGoToClientes }: Props) {
   const [tab, setTab] = useState<Tab>("laudo");
   const laudoRef = useRef<LaudoFormHandle>(null);
   const [savingLaudo, setSavingLaudo] = useState(false);
@@ -38,14 +39,22 @@ export function Visita({ visitaRef, onBack }: Props) {
     <div className="flex h-full flex-col p-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <button
-            onClick={onBack}
-            className="mb-2 inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            ← {visitaRef.empresa}
-          </button>
+          <div className="mb-2 flex items-center gap-2">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              ← {visitaRef.empresa}
+            </button>
+            <button
+              onClick={onGoToClientes}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              ← Clientes
+            </button>
+          </div>
           <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-            {visitaRef.dia}/{visitaRef.mes} — {visitaRef.tipoVisita}
+            {visitaRef.tipoVisita} - {visitaRef.dia}/{visitaRef.mes.split("-")[1]}/{visitaRef.mes.split("-")[0].slice(-2)}
           </h1>
         </div>
         <div className="mr-12 flex items-center gap-2">

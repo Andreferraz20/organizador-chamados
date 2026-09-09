@@ -165,6 +165,7 @@ export interface AppApi {
     open(categoria: DocCategoria, arquivo: string): Promise<void>;
     add(categoria: DocCategoria): Promise<DocumentoInfo[]>;
     rename(categoria: DocCategoria, arquivo: string, novoNome: string): Promise<DocumentoInfo[]>;
+    delete(categoria: DocCategoria, arquivo: string): Promise<DocumentoInfo[]>;
   };
   estoque: {
     listGateways(): Promise<GatewayItem[]>;

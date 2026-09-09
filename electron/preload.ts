@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld("app", {
     add: (categoria: string) => ipcRenderer.invoke("documentacao:add", categoria),
     rename: (categoria: string, arquivo: string, novoNome: string) =>
       ipcRenderer.invoke("documentacao:rename", categoria, arquivo, novoNome),
+    delete: (categoria: string, arquivo: string) => ipcRenderer.invoke("documentacao:delete", categoria, arquivo),
   },
   estoque: {
     listGateways: () => ipcRenderer.invoke("estoque:listGateways"),

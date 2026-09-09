@@ -145,6 +145,7 @@ export default function App() {
         <Visita
           visitaRef={route.ref}
           onBack={() => setRoute(route.voltarPara ?? { name: "cliente", empresa: route.ref.empresa })}
+          onGoToClientes={() => setRoute({ name: "home" })}
         />
       )}
 

@@ -69,7 +69,8 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
         geradoEm: new Date().toLocaleString("pt-BR"),
       };
       if (generatePdf) {
-        await api.laudo.generate(visitaRef, data);
+        const pdfPath = await api.laudo.generate(visitaRef, data);
+        await api.arquivos.openFile(pdfPath);
         setSavedMessage("PDF gerado com sucesso.");
       } else {
         await api.laudo.save(visitaRef, data);
