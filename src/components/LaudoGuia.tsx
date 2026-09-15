@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface PerguntaGuia {
   pergunta: string;
   exemploLabel: string;
@@ -213,6 +215,50 @@ export const GUIA_CORRECAO_TECNICA: GuiaLaudo = {
   ],
 };
 
+function PerguntaCard({ pergunta: p }: { pergunta: PerguntaGuia }) {
+  const [expandido, setExpandido] = useState(false);
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+      <p className="whitespace-pre-line bg-slate-100 px-4 py-2 text-center text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+        {p.pergunta}
+      </p>
+      <div className="border-t border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-slate-200">
+        <span className="font-bold italic text-amber-700 dark:text-amber-400">Instruções de preenchimento:</span>{" "}
+        {p.instrucoes}
+      </div>
+      <button
+        onClick={() => setExpandido((e) => !e)}
+        className="flex w-full items-center justify-between border-t border-slate-200 bg-white px-4 py-2 text-sm font-bold italic text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+      >
+        <span>{p.exemploLabel}</span>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className={`h-4 w-4 shrink-0 transition-transform ${expandido ? "rotate-180" : ""}`}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {expandido && (
+        <div className="border-t border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          {p.exemplo.length === 1 ? (
+            <span>{p.exemplo[0]}</span>
+          ) : (
+            <div className="space-y-0.5">
+              {p.exemplo.map((linha, j) => (
+                <p key={j}>- {linha}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function LaudoGuiaModal({ guia, onClose }: { guia: GuiaLaudo; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -234,29 +280,7 @@ export function LaudoGuiaModal({ guia, onClose }: { guia: GuiaLaudo; onClose: ()
 
           <div className="space-y-3 p-4">
             {guia.perguntas.map((p, i) => (
-              <div key={i} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                <p className="whitespace-pre-line bg-slate-100 px-4 py-2 text-center text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
-                  {p.pergunta}
-                </p>
-                <div className="bg-white px-4 py-3 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-200">
-                  <span className="font-bold italic">{p.exemploLabel}</span>{" "}
-                  {p.exemplo.length === 1 ? (
-                    <span>{p.exemplo[0]}</span>
-                  ) : (
-                    <div className="mt-1 space-y-0.5">
-                      {p.exemplo.map((linha, j) => (
-                        <p key={j}>- {linha}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="border-t border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-slate-200">
-                  <span className="font-bold italic text-amber-700 dark:text-amber-400">
-                    Instruções de preenchimento:
-                  </span>{" "}
-                  {p.instrucoes}
-                </div>
-              </div>
+              <PerguntaCard key={i} pergunta={p} />
             ))}
           </div>
 
