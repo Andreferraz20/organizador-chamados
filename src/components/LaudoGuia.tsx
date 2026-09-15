@@ -111,9 +111,9 @@ export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
       itens: [
         "Foto da medição do aterramento.",
         "Foto da medição da tensão e voltagem.",
-        "Foto da medição da pressão da água.",
-        "Foto da infraestrutura relacionada ao problema (se houver).",
         "Foto do quadro geral e disjuntores (somente se acompanhado pelo responsável da lavanderia).",
+        "Foto da medição da pressão da água. (Em casos de problemas na lavadora)",
+        "Foto da infraestrutura relacionada ao problema (se houver).",
       ],
     },
   ],
