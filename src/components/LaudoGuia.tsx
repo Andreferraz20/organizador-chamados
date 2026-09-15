@@ -45,10 +45,10 @@ export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
         "2. Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
       exemploLabel: "Exemplo de Resposta:",
       exemplo: [
-        "Foi feito o teste de temperatura na máquina devido a reclamação de que não estavam secando as roupas e, não passou de 40ºC.",
-        "Foi aberto a máquina para verificação dos componentes e visto que a resistência não estava apresentando continuidade.",
-        "Foi vista a resistência do aterramento da lavanderia e apresentou 0,1 Ohms, a tensão da tomada estava em 220V e 12V na placa.",
-        "Com esses testes é possível validar que é necessário a troca da resistência e a infraestrutura está dentro dos padrões estabelecidos.",
+        "- Foi feito o teste de temperatura na máquina devido a reclamação de que não estavam secando as roupas e, não passou de 40ºC.",
+        "- Foi aberto a máquina para verificação dos componentes e visto que a resistência não estava apresentando continuidade.",
+        "- Foi vista a resistência do aterramento da lavanderia e apresentou 0,1 Ohms, a tensão da tomada estava em 220V e 12V na placa.",
+        "- Com esses testes é possível validar que é necessário a troca da resistência e a infraestrutura está dentro dos padrões estabelecidos.",
       ],
       instrucoes:
         "Indicar obrigatoriamente os testes bem descritos como identificou o problema no equipamento em questão. (Com fotos)",
@@ -139,8 +139,8 @@ export const GUIA_CORRECAO_TECNICA: GuiaLaudo = {
         "2. Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
       exemploLabel: "Exemplo de Resposta:",
       exemplo: [
-        "Foi feito a troca da resistência, feito o teste de temperatura e a mesma alcançou os 70ºC.",
-        "Máquina liberada para uso.",
+        "- Foi feito a troca da resistência, feito o teste de temperatura e a mesma alcançou os 70ºC.",
+        "- Máquina liberada para uso.",
       ],
       instrucoes:
         "Indicar obrigatoriamente os testes bem descritos como solucionou o problema no equipamento em questão. (Com fotos)",
@@ -251,7 +251,7 @@ function PerguntaCard({ pergunta: p }: { pergunta: PerguntaGuia }) {
           ) : (
             <div className="space-y-0.5">
               {p.exemplo.map((linha, j) => (
-                <p key={j}>- {linha}</p>
+                <p key={j}>{linha}</p>
               ))}
             </div>
           )}
