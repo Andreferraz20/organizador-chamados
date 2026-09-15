@@ -36,7 +36,7 @@ export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
       pergunta:
         "1. Confirmar o número de série dos equipamentos avaliados e a sua sequência. (Exemplo: 1234567890 - ST1)",
       exemploLabel: "Exemplo de Resposta:",
-      exemplo: ["S2 – 2409059888"],
+      exemplo: ["ST1 - 2208044730", "ST2 - 2208044737", "S3 - 2211008909", "TOP - 2211017113"],
       instrucoes:
         "Indicar obrigatoriamente a série e sequência do material, podendo ser máquinas ou periféricos (Bomba, Suporte ou Gateway).",
     },
@@ -130,7 +130,7 @@ export const GUIA_CORRECAO_TECNICA: GuiaLaudo = {
       pergunta:
         "1. Confirmar o número de série dos equipamentos avaliados e a sua sequência. (Exemplo: 1234567890 - ST1)",
       exemploLabel: "Exemplo de Resposta:",
-      exemplo: ["S2 – 2409059888"],
+      exemplo: ["ST1 - 2208044730", "ST2 - 2208044737", "S3 - 2211008909", "TOP - 2211017113"],
       instrucoes:
         "Indicar obrigatoriamente a série e sequência do material, podendo ser máquinas ou periféricos (Bomba, Suporte ou Gateway).",
     },
