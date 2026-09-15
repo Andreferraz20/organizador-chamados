@@ -227,10 +227,10 @@ function PerguntaCard({ pergunta: p }: { pergunta: PerguntaGuia }) {
         <span className="font-bold italic text-amber-700 dark:text-amber-400">Instruções de preenchimento:</span>{" "}
         {p.instrucoes}
       </div>
-      <div className="flex justify-center border-t border-dashed border-violet-300 bg-white px-4 py-3 dark:border-violet-800 dark:bg-slate-900">
+      <div className="flex justify-center border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
         <button
           onClick={() => setExpandido((e) => !e)}
-          className="inline-flex items-center gap-2 rounded-full border border-dashed border-violet-300 bg-white px-4 py-1.5 text-sm font-semibold italic text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:bg-slate-900 dark:text-violet-300 dark:hover:bg-violet-950/40"
+          className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-slate-50 px-4 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
         >
           <span>{p.exemploLabel}</span>
           <svg
@@ -245,7 +245,7 @@ function PerguntaCard({ pergunta: p }: { pergunta: PerguntaGuia }) {
         </button>
       </div>
       {expandido && (
-        <div className="border-t border-dashed border-violet-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-violet-900 dark:bg-slate-900 dark:text-slate-200">
+        <div className="border-t border-dashed border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
           {p.exemplo.length === 1 ? (
             <span>{p.exemplo[0]}</span>
           ) : (
