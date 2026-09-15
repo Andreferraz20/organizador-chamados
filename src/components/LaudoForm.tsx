@@ -1,7 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { api, partsToDate } from "../lib/api";
 import { AutoGrowTextarea } from "./AutoGrowTextarea";
-import { GUIA_AVALIACAO_TECNICA, GUIA_CORRECAO_TECNICA, LaudoGuiaModal, type GuiaLaudo } from "./LaudoGuia";
 import type { LaudoData, VisitaRef } from "../types";
 
 interface Props {
@@ -118,12 +117,6 @@ function camposPara(tipoVisita: string): { key: CampoLaudo; label: string }[] {
   return CAMPOS_GENERICOS;
 }
 
-function guiaPara(tipoVisita: string): GuiaLaudo | null {
-  if (tipoVisita === "Avaliação Técnica") return GUIA_AVALIACAO_TECNICA;
-  if (tipoVisita === "Correção Técnica") return GUIA_CORRECAO_TECNICA;
-  return null;
-}
-
 export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({ visitaRef, onDeleted }, ref) {
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
@@ -131,7 +124,6 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showGuia, setShowGuia] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -211,20 +203,9 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
   }
 
   const fields = camposPara(visitaRef.tipoVisita);
-  const guia = guiaPara(visitaRef.tipoVisita);
 
   return (
     <div className="space-y-4">
-      {guia && (
-        <button
-          onClick={() => setShowGuia(true)}
-          title="Como preencher o laudo"
-          className="fixed right-4 top-16 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-        >
-          ?
-        </button>
-      )}
-
       {fields.map((f) => (
         <div key={f.key}>
           <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{f.label}</label>
@@ -286,8 +267,6 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
           </div>
         </div>
       )}
-
-      {showGuia && guia && <LaudoGuiaModal guia={guia} onClose={() => setShowGuia(false)} />}
     </div>
   );
 });

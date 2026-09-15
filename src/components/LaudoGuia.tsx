@@ -261,6 +261,12 @@ function PerguntaCard({ pergunta: p }: { pergunta: PerguntaGuia }) {
   );
 }
 
+export function guiaPara(tipoVisita: string): GuiaLaudo | null {
+  if (tipoVisita === "Avaliação Técnica") return GUIA_AVALIACAO_TECNICA;
+  if (tipoVisita === "Correção Técnica") return GUIA_CORRECAO_TECNICA;
+  return null;
+}
+
 export function LaudoGuiaModal({ guia, onClose }: { guia: GuiaLaudo; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

@@ -85,7 +85,9 @@ export default function App() {
     <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
       {route.name === "menu" && <ThemeToggle theme={theme} onToggle={toggle} />}
 
-      {route.name !== "menu" && <BackToMenuButton onClick={() => setRoute({ name: "menu" })} />}
+      {route.name !== "menu" && route.name !== "visita" && (
+        <BackToMenuButton onClick={() => setRoute({ name: "menu" })} />
+      )}
 
       {route.name === "menu" && (
         <MainMenu
@@ -146,6 +148,7 @@ export default function App() {
           visitaRef={route.ref}
           onBack={() => setRoute(route.voltarPara ?? { name: "cliente", empresa: route.ref.empresa })}
           onGoToClientes={() => setRoute({ name: "home" })}
+          onGoHome={() => setRoute({ name: "menu" })}
         />
       )}
 
