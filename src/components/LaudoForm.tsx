@@ -205,15 +205,15 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
   const fields = camposPara(visitaRef.tipoVisita);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {fields.map((f) => (
         <div key={f.key}>
-          <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{f.label}</label>
+          <label className="mb-1.5 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{f.label}</label>
           <AutoGrowTextarea
             value={form[f.key]}
             onChange={(e) => update(f.key, e.target.value)}
             rows={3}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
           />
         </div>
       ))}

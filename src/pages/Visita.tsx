@@ -53,7 +53,7 @@ export function Visita({ visitaRef, onBack, onGoToClientes, onGoHome }: Props) {
 
   return (
     <div className="flex h-full flex-col p-8">
-      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+      <div className="shrink-0 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
         <div className="bg-slate-100 px-5 py-4 dark:bg-slate-800">
           <div className="mb-3 inline-flex overflow-hidden rounded-lg border border-slate-300 dark:border-slate-700">
             <button
@@ -123,9 +123,9 @@ export function Visita({ visitaRef, onBack, onGoToClientes, onGoHome }: Props) {
               <button
                 key={value}
                 onClick={() => setTab(value)}
-                className={`relative top-px rounded-t-lg border px-4 py-2 text-sm font-semibold ${
+                className={`rounded-t-lg border px-4 py-2 text-sm font-semibold ${
                   tab === value
-                    ? "border-slate-200 border-b-white bg-white text-blue-600 dark:border-slate-700 dark:border-b-slate-900 dark:bg-slate-900 dark:text-blue-400"
+                    ? "border-slate-200 bg-white text-blue-600 dark:border-slate-700 dark:bg-slate-900 dark:text-blue-400"
                     : "border-transparent bg-slate-200/50 text-slate-500 hover:text-slate-700 dark:bg-slate-700/50 dark:text-slate-400 dark:hover:text-slate-200"
                 }`}
               >
@@ -134,20 +134,20 @@ export function Visita({ visitaRef, onBack, onGoToClientes, onGoHome }: Props) {
             ))}
           </div>
         </div>
+      </div>
 
-        {/*
-          As duas abas ficam sempre montadas (só escondidas via CSS) em vez de
-          desmontadas na troca de aba. Antes, trocar pra "Fotos e Vídeos" sem
-          salvar destruía o texto do laudo ainda não salvo, causando perda de
-          dados ao voltar depois.
-        */}
-        <div className="flex-1 overflow-y-auto border-t border-slate-200 p-6 dark:border-slate-700">
-          <div className={tab === "laudo" ? "" : "hidden"}>
-            <LaudoForm ref={laudoRef} visitaRef={visitaRef} onDeleted={onBack} />
-          </div>
-          <div className={tab === "midia" ? "" : "hidden"}>
-            <FileDropzone visitaRef={visitaRef} />
-          </div>
+      {/*
+        As duas abas ficam sempre montadas (só escondidas via CSS) em vez de
+        desmontadas na troca de aba. Antes, trocar pra "Fotos e Vídeos" sem
+        salvar destruía o texto do laudo ainda não salvo, causando perda de
+        dados ao voltar depois.
+      */}
+      <div className="flex-1 overflow-y-auto pt-6">
+        <div className={tab === "laudo" ? "" : "hidden"}>
+          <LaudoForm ref={laudoRef} visitaRef={visitaRef} onDeleted={onBack} />
+        </div>
+        <div className={tab === "midia" ? "" : "hidden"}>
+          <FileDropzone visitaRef={visitaRef} />
         </div>
       </div>
 
