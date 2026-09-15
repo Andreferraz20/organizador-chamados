@@ -73,7 +73,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   tiposDeVisita: [
     { label: "Avaliação Técnica", sigla: "VTAVA" },
     { label: "Manutenção Preventiva", sigla: "MANUP" },
-    { label: "Manutenção Corretiva", sigla: "CORRETIVA" },
+    { label: "Correção Técnica", sigla: "CORRETIVA" },
   ],
   tecnicoNome: "",
   tecnicoEmpresa: "",

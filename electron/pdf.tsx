@@ -20,7 +20,103 @@ interface LaudoData {
   pecasSolicitadas: string;
   materialEstoque: string;
   acompanhante: string;
+  testesRealizados: string;
+  equipamentoInterditado: string;
+  outroEquipamentoProblema: string;
+  condicoesOrganizacao: string;
+  testeLiberacao: string;
+  atualizacaoCadastral: string;
+  observacoes: string;
   geradoEm: string;
+}
+
+type CampoLaudo = keyof Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm">;
+
+const CAMPOS_AVALIACAO_TECNICA: { key: CampoLaudo; label: string }[] = [
+  { key: "numeroSerie", label: "Confirmar o número de série dos equipamentos avaliados e a sua sequência." },
+  {
+    key: "testesRealizados",
+    label:
+      "Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
+  },
+  {
+    key: "materialEstoque",
+    label:
+      "Foi utilizado algum material do estoque técnico? Indicar equipamento (série e posição), código da peça (PN) e quantidade.",
+  },
+  { key: "equipamentoInterditado", label: "Indique série e posição do equipamento interditado (se houver)." },
+  {
+    key: "condicoesOrganizacao",
+    label:
+      "Indicar as condições de organização e limpeza dos equipamentos e espaço da lavanderia. Foi necessário tomar alguma ação?",
+  },
+  {
+    key: "testeLiberacao",
+    label:
+      "Realizar teste de liberação dos equipamentos (APP/FICHA) a depender da forma de pagamento do cliente e fazer ciclo teste.",
+  },
+  { key: "acompanhante", label: "Indicar nome e cargo de quem acompanhou." },
+  {
+    key: "atualizacaoCadastral",
+    label:
+      "Atualização cadastral: Indicar nome, cargo e telefone do responsável pela administração do condomínio (Síndico/Gerente Predial)",
+  },
+  {
+    key: "observacoes",
+    label: "Observações gerais, sugestões e melhorias (Infra/Área Técnica/Identidade Visual e utilização).",
+  },
+];
+
+const CAMPOS_CORRECAO_TECNICA: { key: CampoLaudo; label: string }[] = [
+  { key: "numeroSerie", label: "Confirmar o número de série dos equipamentos avaliados e a sua sequência." },
+  {
+    key: "testesRealizados",
+    label:
+      "Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
+  },
+  {
+    key: "materialEstoque",
+    label:
+      "Foi utilizado algum material do estoque técnico? Indicar equipamento (série e posição), código da peça (PN) e quantidade.",
+  },
+  {
+    key: "outroEquipamentoProblema",
+    label: "Existe algum outro equipamento com problema no local? Equipamento ficou interditado?",
+  },
+  {
+    key: "condicoesOrganizacao",
+    label:
+      "Indicar as condições de organização e limpeza dos equipamentos e espaço da lavanderia. Foi necessário tomar alguma ação?",
+  },
+  {
+    key: "testeLiberacao",
+    label:
+      "Realizar teste de liberação dos equipamentos (APP/FICHA) a depender da forma de pagamento do cliente e fazer ciclo teste.",
+  },
+  { key: "acompanhante", label: "Indicar nome e cargo de quem acompanhou." },
+  {
+    key: "atualizacaoCadastral",
+    label:
+      "Atualização cadastral: Indicar nome, cargo e telefone do responsável pela administração do condomínio (Síndico/Gerente Predial)",
+  },
+  {
+    key: "observacoes",
+    label: "Observações gerais, sugestões e melhorias (Infra/Área Técnica/Identidade Visual e utilização).",
+  },
+];
+
+const CAMPOS_GENERICOS: { key: CampoLaudo; label: string }[] = [
+  { key: "numeroSerie", label: "Número de Série dos Equipamentos" },
+  { key: "laudoTecnico", label: "Laudo Técnico" },
+  { key: "pecasSolicitadas", label: "Peças Solicitadas" },
+  { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?" },
+  { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica" },
+];
+
+function camposPara(tipoVisita: string): { key: CampoLaudo; label: string }[] {
+  if (tipoVisita === "Avaliação Técnica") return CAMPOS_AVALIACAO_TECNICA;
+  if (tipoVisita === "Correção Técnica") return CAMPOS_CORRECAO_TECNICA;
+  return CAMPOS_GENERICOS;
 }
 
 const styles = StyleSheet.create({
@@ -56,11 +152,9 @@ function LaudoDocument({ data }: { data: LaudoData }) {
           {data.empresa} — {data.data} — {data.tipoVisita}
         </Text>
 
-        <MultilineField label="Número de Série dos Equipamentos" value={data.numeroSerie} />
-        <MultilineField label="Laudo Técnico" value={data.laudoTecnico} />
-        <MultilineField label="Peças Solicitadas" value={data.pecasSolicitadas} />
-        <MultilineField label="Foi utilizado algum material do estoque técnico?" value={data.materialEstoque} />
-        <MultilineField label="Dados de quem acompanhou a visita técnica" value={data.acompanhante} />
+        {camposPara(data.tipoVisita).map((f) => (
+          <MultilineField key={f.key} label={f.label} value={data[f.key]} />
+        ))}
 
         <Text style={styles.footer}>Gerado em {data.geradoEm}</Text>
       </Page>

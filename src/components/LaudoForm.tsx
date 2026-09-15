@@ -19,7 +19,103 @@ const EMPTY: Omit<LaudoData, "empresa" | "data" | "tipoVisita" | "geradoEm"> = {
   pecasSolicitadas: "",
   materialEstoque: "",
   acompanhante: "",
+  testesRealizados: "",
+  equipamentoInterditado: "",
+  outroEquipamentoProblema: "",
+  condicoesOrganizacao: "",
+  testeLiberacao: "",
+  atualizacaoCadastral: "",
+  observacoes: "",
 };
+
+type CampoLaudo = keyof typeof EMPTY;
+
+const CAMPOS_AVALIACAO_TECNICA: { key: CampoLaudo; label: string }[] = [
+  { key: "numeroSerie", label: "1. Confirmar o número de série dos equipamentos avaliados e a sua sequência." },
+  {
+    key: "testesRealizados",
+    label:
+      "2. Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
+  },
+  {
+    key: "materialEstoque",
+    label:
+      "3. Foi utilizado algum material do estoque técnico? Indicar equipamento (série e posição), código da peça (PN) e quantidade.",
+  },
+  { key: "equipamentoInterditado", label: "4. Indique série e posição do equipamento interditado (se houver)." },
+  {
+    key: "condicoesOrganizacao",
+    label:
+      "5. Indicar as condições de organização e limpeza dos equipamentos e espaço da lavanderia. Foi necessário tomar alguma ação?",
+  },
+  {
+    key: "testeLiberacao",
+    label:
+      "6. Realizar teste de liberação dos equipamentos (APP/FICHA) a depender da forma de pagamento do cliente e fazer ciclo teste.",
+  },
+  { key: "acompanhante", label: "7. Indicar nome e cargo de quem acompanhou." },
+  {
+    key: "atualizacaoCadastral",
+    label:
+      "8. Atualização cadastral: Indicar nome, cargo e telefone do responsável pela administração do condomínio (Síndico/Gerente Predial)",
+  },
+  {
+    key: "observacoes",
+    label: "9. Observações gerais, sugestões e melhorias (Infra/Área Técnica/Identidade Visual e utilização).",
+  },
+];
+
+const CAMPOS_CORRECAO_TECNICA: { key: CampoLaudo; label: string }[] = [
+  { key: "numeroSerie", label: "1. Confirmar o número de série dos equipamentos avaliados e a sua sequência." },
+  {
+    key: "testesRealizados",
+    label:
+      "2. Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
+  },
+  {
+    key: "materialEstoque",
+    label:
+      "3. Foi utilizado algum material do estoque técnico? Indicar equipamento (série e posição), código da peça (PN) e quantidade.",
+  },
+  {
+    key: "outroEquipamentoProblema",
+    label: "4. Existe algum outro equipamento com problema no local? Equipamento ficou interditado?",
+  },
+  {
+    key: "condicoesOrganizacao",
+    label:
+      "5. Indicar as condições de organização e limpeza dos equipamentos e espaço da lavanderia. Foi necessário tomar alguma ação?",
+  },
+  {
+    key: "testeLiberacao",
+    label:
+      "6. Realizar teste de liberação dos equipamentos (APP/FICHA) a depender da forma de pagamento do cliente e fazer ciclo teste.",
+  },
+  { key: "acompanhante", label: "7. Indicar nome e cargo de quem acompanhou." },
+  {
+    key: "atualizacaoCadastral",
+    label:
+      "8. Atualização cadastral: Indicar nome, cargo e telefone do responsável pela administração do condomínio (Síndico/Gerente Predial)",
+  },
+  {
+    key: "observacoes",
+    label: "9. Observações gerais, sugestões e melhorias (Infra/Área Técnica/Identidade Visual e utilização).",
+  },
+];
+
+const CAMPOS_GENERICOS: { key: CampoLaudo; label: string }[] = [
+  { key: "numeroSerie", label: "Número de Série dos Equipamentos" },
+  { key: "laudoTecnico", label: "Laudo Técnico" },
+  { key: "pecasSolicitadas", label: "Peças Solicitadas" },
+  { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?" },
+  { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica" },
+];
+
+function camposPara(tipoVisita: string): { key: CampoLaudo; label: string }[] {
+  if (tipoVisita === "Avaliação Técnica") return CAMPOS_AVALIACAO_TECNICA;
+  if (tipoVisita === "Correção Técnica") return CAMPOS_CORRECAO_TECNICA;
+  return CAMPOS_GENERICOS;
+}
 
 export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({ visitaRef, onDeleted }, ref) {
   const [form, setForm] = useState(EMPTY);
@@ -42,6 +138,13 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
               pecasSolicitadas: existing.pecasSolicitadas ?? "",
               materialEstoque: existing.materialEstoque ?? "",
               acompanhante: existing.acompanhante ?? "",
+              testesRealizados: existing.testesRealizados ?? "",
+              equipamentoInterditado: existing.equipamentoInterditado ?? "",
+              outroEquipamentoProblema: existing.outroEquipamentoProblema ?? "",
+              condicoesOrganizacao: existing.condicoesOrganizacao ?? "",
+              testeLiberacao: existing.testeLiberacao ?? "",
+              atualizacaoCadastral: existing.atualizacaoCadastral ?? "",
+              observacoes: existing.observacoes ?? "",
             }
           : EMPTY,
       );
@@ -99,34 +202,19 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
     return <p className="text-sm text-slate-400 dark:text-slate-500">Carregando laudo…</p>;
   }
 
-  const fields: { key: keyof typeof form; label: string; multiline?: boolean; placeholder?: string }[] = [
-    { key: "numeroSerie", label: "Número de Série dos Equipamentos", multiline: true },
-    { key: "laudoTecnico", label: "Laudo Técnico", multiline: true },
-    { key: "pecasSolicitadas", label: "Peças Solicitadas", multiline: true },
-    { key: "materialEstoque", label: "Foi utilizado algum material do estoque técnico?", multiline: true },
-    { key: "acompanhante", label: "Dados de quem acompanhou a visita técnica", multiline: true },
-  ];
+  const fields = camposPara(visitaRef.tipoVisita);
 
   return (
     <div className="space-y-4">
       {fields.map((f) => (
         <div key={f.key}>
           <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{f.label}</label>
-          {f.multiline ? (
-            <AutoGrowTextarea
-              value={form[f.key]}
-              onChange={(e) => update(f.key, e.target.value)}
-              rows={3}
-              placeholder={f.placeholder}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
-            />
-          ) : (
-            <input
-              value={form[f.key]}
-              onChange={(e) => update(f.key, e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-          )}
+          <AutoGrowTextarea
+            value={form[f.key]}
+            onChange={(e) => update(f.key, e.target.value)}
+            rows={3}
+            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
+          />
         </div>
       ))}
 

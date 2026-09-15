@@ -29,6 +29,13 @@ export interface LaudoData {
   pecasSolicitadas: string;
   materialEstoque: string;
   acompanhante: string;
+  testesRealizados: string;
+  equipamentoInterditado: string;
+  outroEquipamentoProblema: string;
+  condicoesOrganizacao: string;
+  testeLiberacao: string;
+  atualizacaoCadastral: string;
+  observacoes: string;
   geradoEm: string;
 }
 
