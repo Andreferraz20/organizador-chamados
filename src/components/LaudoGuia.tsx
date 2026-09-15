@@ -16,6 +16,17 @@ export interface GuiaLaudo {
   notas: NotaGuia[];
 }
 
+const NOTA_GARANTIA_PADRAO: NotaGuia = {
+  titulo: "Em caso de garantia (além das fotos padrões, registrar):",
+  itens: [
+    "Foto da medição do aterramento.",
+    "Foto da medição da tensão e voltagem.",
+    "Foto do quadro geral e disjuntores (somente se acompanhado pelo responsável da lavanderia).",
+    "Foto da medição da pressão da água. (Em casos de problemas na lavadora)",
+    "Foto da infraestrutura relacionada ao problema (se houver).",
+  ],
+};
+
 export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
   titulo: "Laudo Avaliação Técnica",
   perguntas: [
@@ -106,16 +117,99 @@ export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
         "Vídeo da máquina com o problema acontecendo",
       ],
     },
+    NOTA_GARANTIA_PADRAO,
+  ],
+};
+
+export const GUIA_CORRECAO_TECNICA: GuiaLaudo = {
+  titulo: "Laudo Correção Técnica",
+  perguntas: [
     {
-      titulo: "Em caso de garantia (além das fotos padrões, registrar):",
+      pergunta:
+        "1. Confirmar o número de série dos equipamentos avaliados e a sua sequência. (Exemplo: 1234567890 - ST1)",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["S2 – 2409059888"],
+      instrucoes:
+        "Indicar obrigatoriamente a série e sequência do material, podendo ser máquinas ou periféricos (Bomba, Suporte ou Gateway).",
+    },
+    {
+      pergunta:
+        "2. Descrever os testes e procedimentos realizados, indicar código (PN) das peças danificadas, se houver (anexar foto) e, indicar série do equipamento.",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: [
+        "Foi feito a troca da resistência, feito o teste de temperatura e a mesma alcançou os 70ºC.",
+        "Máquina liberada para uso.",
+      ],
+      instrucoes:
+        "Indicar obrigatoriamente os testes bem descritos como solucionou o problema no equipamento em questão. (Com fotos)",
+    },
+    {
+      pergunta:
+        "3. Foi utilizado algum material do estoque técnico? Indicar equipamento (série e posição), código da peça (PN) e quantidade. (Em troca de gateway indicar número de série do material)",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["Não foi utilizado estoque técnico."],
+      instrucoes:
+        'Obrigatoriamente nessa pergunta o técnico preencha com "Não" ou "Sim", em caso de sim, indicar qual material, caso tenha série indicar a série que foi tirada do estoque dele (e devolver a danificada o quanto antes). (Com fotos)',
+    },
+    {
+      pergunta: "4. Existe algum outro equipamento com problema no local? Equipamento ficou interditado?",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["(x) Nenhum outro equipamento com problema ou ( ) Sim – Líder acionado para novo laudo"],
+      instrucoes:
+        "Obrigatoriamente, caso tenha algum problema identificado, o técnico deve solicitar um novo laudo de avaliativa para a linha.",
+    },
+    {
+      pergunta:
+        "5. Indicar as condições de organização e limpeza dos equipamentos e espaço da lavanderia. Foi necessário tomar alguma ação?",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: [
+        "Uma observação é de que as borrachas das lavadoras estavam limpas. Orientação passada na visita de avaliação surtiu efeito.",
+      ],
+      instrucoes:
+        "Obrigatoriamente nessa pergunta o técnico preencha como foi encontrado a lavanderia e ao sair do local como deixou. (Com fotos se necessário)",
+    },
+    {
+      pergunta:
+        "6. Realizar teste de liberação dos equipamentos (APP/FICHA) a depender da forma de pagamento do cliente e fazer ciclo teste.",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["Foi feito o teste de liberação via app e a máquina liberou corretamente e feito ciclo teste completo sem falhas."],
+      instrucoes:
+        'Obrigatoriamente nessa pergunta o técnico preencha com o teste "final" com liberação no sistema de pagamento do cliente + ciclo com a máquina funcionando. (Caso o equipamento esteja interditado, indicar que não foi possível realizar o teste). (Vídeo)',
+    },
+    {
+      pergunta: "7. Indicar nome e cargo de quem acompanhou.",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["Sr. Antônio – Zelador"],
+      instrucoes: "Queremos que nessa pergunta o técnico preencha com o nome e cargo de quem acompanhou.",
+    },
+    {
+      pergunta:
+        "8. Atualização cadastral: Indicar nome, cargo e telefone do responsável pela administração do condomínio (Síndico/Gerente Predial).",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["Sr. João - Síndico – 11965789999"],
+      instrucoes:
+        "Queremos que nessa pergunta o técnico preencha com as informações solicitadas, mesmo que seja a mesma pessoa acima, e questione a informação para quem acompanhou.",
+    },
+    {
+      pergunta:
+        "9. Observações gerais, sugestões e melhorias (Infra/Área Técnica/Identidade Visual e utilização).",
+      exemploLabel: "Exemplo de Resposta:",
+      exemplo: ["Sem observações."],
+      instrucoes:
+        "Queremos que o técnico preencha de forma clara pontos necessários que entende que não cabem nas perguntas anteriores. (Com fotos se necessário)",
+    },
+  ],
+  notas: [
+    {
+      titulo: "Exemplo de fotos no acompanhamento:",
       itens: [
-        "Foto da medição do aterramento.",
-        "Foto da medição da tensão e voltagem.",
-        "Foto do quadro geral e disjuntores (somente se acompanhado pelo responsável da lavanderia).",
-        "Foto da medição da pressão da água. (Em casos de problemas na lavadora)",
-        "Foto da infraestrutura relacionada ao problema (se houver).",
+        "Foto da série",
+        "Foto da máquina aberta",
+        "Foto da peça antiga x Nova",
+        "Vídeo da máquina funcionando",
       ],
     },
+    NOTA_GARANTIA_PADRAO,
   ],
 };
 

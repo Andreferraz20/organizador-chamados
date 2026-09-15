@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { api, partsToDate } from "../lib/api";
 import { AutoGrowTextarea } from "./AutoGrowTextarea";
-import { GUIA_AVALIACAO_TECNICA, LaudoGuiaModal, type GuiaLaudo } from "./LaudoGuia";
+import { GUIA_AVALIACAO_TECNICA, GUIA_CORRECAO_TECNICA, LaudoGuiaModal, type GuiaLaudo } from "./LaudoGuia";
 import type { LaudoData, VisitaRef } from "../types";
 
 interface Props {
@@ -120,6 +120,7 @@ function camposPara(tipoVisita: string): { key: CampoLaudo; label: string }[] {
 
 function guiaPara(tipoVisita: string): GuiaLaudo | null {
   if (tipoVisita === "Avaliação Técnica") return GUIA_AVALIACAO_TECNICA;
+  if (tipoVisita === "Correção Técnica") return GUIA_CORRECAO_TECNICA;
   return null;
 }
 
