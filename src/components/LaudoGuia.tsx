@@ -17,7 +17,7 @@ export interface GuiaLaudo {
 }
 
 export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
-  titulo: "Laudo Avaliativa",
+  titulo: "Laudo Avaliação Técnica",
   perguntas: [
     {
       pergunta:
@@ -138,30 +138,35 @@ export function LaudoGuiaModal({ guia, onClose }: { guia: GuiaLaudo; onClose: ()
             {guia.titulo}
           </p>
 
-          {guia.perguntas.map((p, i) => (
-            <div key={i}>
-              <p className="whitespace-pre-line bg-slate-200 px-4 py-2 text-center text-sm font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-100">
-                {p.pergunta}
-              </p>
-              <div className="px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
-                <span className="font-bold italic">{p.exemploLabel}</span>{" "}
-                {p.exemplo.length === 1 ? (
-                  <span>{p.exemplo[0]}</span>
-                ) : (
-                  <div className="mt-1 space-y-0.5">
-                    {p.exemplo.map((linha, j) => (
-                      <p key={j}>- {linha}</p>
-                    ))}
-                  </div>
-                )}
+          <div className="space-y-3 p-4">
+            {guia.perguntas.map((p, i) => (
+              <div key={i} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                <p className="whitespace-pre-line bg-slate-100 px-4 py-2 text-center text-sm font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+                  {p.pergunta}
+                </p>
+                <div className="bg-white px-4 py-3 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  <span className="font-bold italic">{p.exemploLabel}</span>{" "}
+                  {p.exemplo.length === 1 ? (
+                    <span>{p.exemplo[0]}</span>
+                  ) : (
+                    <div className="mt-1 space-y-0.5">
+                      {p.exemplo.map((linha, j) => (
+                        <p key={j}>- {linha}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="border-t border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-slate-200">
+                  <span className="font-bold italic text-amber-700 dark:text-amber-400">
+                    Instruções de preenchimento:
+                  </span>{" "}
+                  {p.instrucoes}
+                </div>
               </div>
-              <div className="bg-yellow-100 px-4 py-3 text-sm text-slate-800 dark:bg-yellow-900/40 dark:text-yellow-100">
-                <span className="font-bold italic">Instruções de preenchimento:</span> {p.instrucoes}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
 
-          <div className="space-y-4 px-4 py-4 text-sm text-slate-700 dark:text-slate-200">
+          <div className="space-y-4 px-4 pb-4 text-sm text-slate-700 dark:text-slate-200">
             {guia.notas.map((nota, i) => (
               <div key={i}>
                 <p className="font-bold italic">{nota.titulo}</p>

@@ -215,15 +215,13 @@ export const LaudoForm = forwardRef<LaudoFormHandle, Props>(function LaudoForm({
   return (
     <div className="space-y-4">
       {guia && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => setShowGuia(true)}
-            title="Como preencher o laudo"
-            className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-300 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-          >
-            ?
-          </button>
-        </div>
+        <button
+          onClick={() => setShowGuia(true)}
+          title="Como preencher o laudo"
+          className="fixed right-4 top-16 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-md hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          ?
+        </button>
       )}
 
       {fields.map((f) => (
