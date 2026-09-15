@@ -83,7 +83,7 @@ export default function App() {
 
   return (
     <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
-      <ThemeToggle theme={theme} onToggle={toggle} />
+      {route.name === "menu" && <ThemeToggle theme={theme} onToggle={toggle} />}
 
       {route.name !== "menu" && <BackToMenuButton onClick={() => setRoute({ name: "menu" })} />}
 

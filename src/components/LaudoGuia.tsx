@@ -113,10 +113,10 @@ export const GUIA_AVALIACAO_TECNICA: GuiaLaudo = {
     {
       titulo: "Exemplo de fotos no acompanhamento:",
       itens: [
-        "Foto da série",
-        "Foto da máquina aberta",
-        "Foto da peça avaliada",
-        "Vídeo da máquina com o problema acontecendo",
+        "Foto dos números de série das máquinas.",
+        "Foto da máquina aberta.",
+        "Foto da peça avaliada.",
+        "Vídeo da máquina com o problema acontecendo. (Se possível)",
       ],
     },
     NOTA_GARANTIA_PADRAO,
@@ -227,23 +227,25 @@ function PerguntaCard({ pergunta: p }: { pergunta: PerguntaGuia }) {
         <span className="font-bold italic text-amber-700 dark:text-amber-400">Instruções de preenchimento:</span>{" "}
         {p.instrucoes}
       </div>
-      <button
-        onClick={() => setExpandido((e) => !e)}
-        className="flex w-full items-center justify-between border-t border-slate-200 bg-white px-4 py-2 text-sm font-bold italic text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-      >
-        <span>{p.exemploLabel}</span>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className={`h-4 w-4 shrink-0 transition-transform ${expandido ? "rotate-180" : ""}`}
+      <div className="flex justify-center border-t border-dashed border-violet-300 bg-white px-4 py-3 dark:border-violet-800 dark:bg-slate-900">
+        <button
+          onClick={() => setExpandido((e) => !e)}
+          className="inline-flex items-center gap-2 rounded-full border border-dashed border-violet-300 bg-white px-4 py-1.5 text-sm font-semibold italic text-violet-700 hover:bg-violet-50 dark:border-violet-700 dark:bg-slate-900 dark:text-violet-300 dark:hover:bg-violet-950/40"
         >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
+          <span>{p.exemploLabel}</span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className={`h-3.5 w-3.5 shrink-0 transition-transform ${expandido ? "rotate-180" : ""}`}
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+      </div>
       {expandido && (
-        <div className="border-t border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+        <div className="border-t border-dashed border-violet-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-violet-900 dark:bg-slate-900 dark:text-slate-200">
           {p.exemplo.length === 1 ? (
             <span>{p.exemplo[0]}</span>
           ) : (
@@ -284,13 +286,17 @@ export function LaudoGuiaModal({ guia, onClose }: { guia: GuiaLaudo; onClose: ()
             ))}
           </div>
 
-          <div className="space-y-4 px-4 pb-4 text-sm text-slate-700 dark:text-slate-200">
+          <div className="space-y-3 px-4 pb-4">
             {guia.notas.map((nota, i) => (
-              <div key={i}>
-                <p className="font-bold italic">{nota.titulo}</p>
-                {nota.itens.map((item, j) => (
-                  <p key={j}>{item}</p>
-                ))}
+              <div key={i} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                <p className="bg-slate-100 px-4 py-2 text-sm font-bold italic text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+                  {nota.titulo}
+                </p>
+                <div className="space-y-0.5 bg-white px-4 py-3 text-sm text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                  {nota.itens.map((item, j) => (
+                    <p key={j}>{item}</p>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
