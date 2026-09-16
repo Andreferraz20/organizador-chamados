@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { EmptyHint } from "../components/EmptyHint";
 import { TIPOS_MAQUINA, calcularBocas, trocarTipoNaNumeracao } from "../components/ClienteDadosForm";
+import { PillSelect } from "../components/PillSelect";
 import type { NumeroSerie } from "../types";
 
 interface Props {
@@ -430,7 +431,7 @@ function AdicionarClienteModal({
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                Números de Série <span className="normal-case text-slate-400">(opcional)</span>
+                Máquinas <span className="normal-case text-slate-400">(opcional)</span>
               </label>
               <button
                 onClick={addNumeroSerie}
@@ -462,20 +463,13 @@ function AdicionarClienteModal({
                       placeholder="Número de série"
                       className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                     />
-                    <select
+                    <PillSelect
                       value={ns.tipoMaquina}
-                      onChange={(e) => updateTipoMaquina(index, e.target.value)}
-                      className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                    >
-                      <option value="" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
-                        Tipo de máquina
-                      </option>
-                      {TIPOS_MAQUINA.map((tipo) => (
-                        <option key={tipo} value={tipo} className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
-                          {tipo}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(novoTipo) => updateTipoMaquina(index, novoTipo)}
+                      options={TIPOS_MAQUINA}
+                      placeholder="Tipo de máquina"
+                      triggerClassName="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                    />
                     <button
                       onClick={() => removeNumeroSerie(index)}
                       title="Remover"

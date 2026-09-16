@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { EmptyHint } from "./EmptyHint";
+import { PillSelect } from "./PillSelect";
 import type { ClienteDados, NumeroSerie, Pessoa } from "../types";
 
 export const TIPOS_MAQUINA = [
@@ -251,7 +252,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                Números de Série
+                Máquinas
               </label>
               <button
                 onClick={addNumeroSerie}
@@ -262,7 +263,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
             </div>
 
             {form.numerosSerie.length === 0 ? (
-              <EmptyHint text="Nenhum número de série adicionado." />
+              <EmptyHint text="Nenhuma máquina adicionada." />
             ) : (
               <div className="space-y-2">
                 {form.numerosSerie.map((ns, index) => (
@@ -336,20 +337,13 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                         <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                           Tipo
                         </label>
-                        <select
+                        <PillSelect
                           value={ns.tipoMaquina}
-                          onChange={(e) => updateTipoMaquina(index, e.target.value)}
-                          className="w-full bg-transparent text-sm text-slate-800 focus:outline-none dark:text-slate-100"
-                        >
-                          <option value="" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
-                            Tipo de máquina
-                          </option>
-                          {TIPOS_MAQUINA.map((tipo) => (
-                            <option key={tipo} value={tipo} className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
-                              {tipo}
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(novoTipo) => updateTipoMaquina(index, novoTipo)}
+                          options={TIPOS_MAQUINA}
+                          placeholder="Tipo de máquina"
+                          triggerClassName="w-full text-sm text-slate-800 dark:text-slate-100"
+                        />
                       </div>
                     </div>
 
