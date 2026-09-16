@@ -194,7 +194,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
   const quantidadeBocas = calcularBocas(form.numerosSerie);
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="max-w-6xl space-y-6">
       <div className="max-w-md space-y-4">
         <div>
           <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
