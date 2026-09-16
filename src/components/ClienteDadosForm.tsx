@@ -376,18 +376,18 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
             <div className="space-y-2">
               {form.pessoas.map((pessoa, index) => (
                 <div key={index} className="relative overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="grid grid-cols-2 gap-2 bg-blue-50 px-3 py-2.5 pr-9 dark:bg-blue-950">
+                  <div className="grid grid-cols-2 gap-2 bg-blue-50 px-3 py-2.5 pr-9 dark:bg-[#16314f]">
                     <input
                       value={pessoa.nome}
                       onChange={(e) => updatePessoa(index, "nome", e.target.value)}
                       placeholder="Nome"
-                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-blue-800 dark:bg-blue-900/60 dark:text-blue-100 dark:placeholder:text-blue-400/60"
+                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-[#2c4a6e] dark:bg-[#1c3552] dark:text-[#dbe7f7] dark:placeholder:text-[#7ea0c9]"
                     />
                     <input
                       value={pessoa.cargo}
                       onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
                       placeholder="Cargo"
-                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-blue-800 dark:bg-blue-900/60 dark:text-blue-100 dark:placeholder:text-blue-400/60"
+                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-[#2c4a6e] dark:bg-[#1c3552] dark:text-[#dbe7f7] dark:placeholder:text-[#7ea0c9]"
                     />
                   </div>
                   <button
