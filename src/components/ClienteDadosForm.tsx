@@ -56,6 +56,15 @@ function emptyDados(empresa: string): ClienteDados {
   return { nome: empresa, endereco: "", codigoLavanderia: "", quantidadeBocas: "", numerosSerie: [], pessoas: [] };
 }
 
+/** Coloca o DDD entre parênteses assim que os dois primeiros dígitos são digitados (ex: "11987654321" -> "(11) 987654321"). */
+function formatTelefone(value: string): string {
+  const semParenteses = value.replace(/[()]/g, "");
+  const ddd = semParenteses.slice(0, 2);
+  const resto = semParenteses.slice(2).replace(/^\s+/, "");
+  if (ddd.length < 2) return semParenteses;
+  return resto ? `(${ddd}) ${resto}` : `(${ddd}) `;
+}
+
 export function ClienteDadosForm({ empresa, onRenamed }: Props) {
   const [form, setForm] = useState<ClienteDados>(() => emptyDados(empresa));
   const [loading, setLoading] = useState(true);
@@ -79,6 +88,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
         ...n,
         numeracao: n.numeracao || PREFIXO_POR_TIPO[n.tipoMaquina] || "",
       }));
+      merged.pessoas = merged.pessoas.map((p) => ({ ...p, contato: formatTelefone(p.contato) }));
       setForm(merged);
       setLoading(false);
     });
@@ -376,24 +386,24 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
             <div className="space-y-2">
               {form.pessoas.map((pessoa, index) => (
                 <div key={index} className="relative overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="grid grid-cols-2 gap-2 bg-blue-50 px-3 py-2.5 pr-9 dark:bg-[#16314f]">
+                  <div className="grid grid-cols-2 gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 pr-9 dark:border-slate-700 dark:bg-slate-800">
                     <input
                       value={pessoa.nome}
                       onChange={(e) => updatePessoa(index, "nome", e.target.value)}
                       placeholder="Nome"
-                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-[#2c4a6e] dark:bg-[#1c3552] dark:text-[#dbe7f7] dark:placeholder:text-[#7ea0c9]"
+                      className="min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                     />
                     <input
                       value={pessoa.cargo}
                       onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
                       placeholder="Cargo"
-                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-[#2c4a6e] dark:bg-[#1c3552] dark:text-[#dbe7f7] dark:placeholder:text-[#7ea0c9]"
+                      className="min-w-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
                     />
                   </div>
                   <button
                     onClick={() => removePessoa(index)}
                     title="Remover pessoa"
-                    className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 hover:text-red-600 dark:text-blue-500 dark:hover:bg-blue-900/40 dark:hover:text-red-400"
+                    className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-red-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-red-400"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
                       <path d="M18 6 6 18M6 6l12 12" />
@@ -406,7 +416,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                       </label>
                       <input
                         value={pessoa.contato}
-                        onChange={(e) => updatePessoa(index, "contato", e.target.value)}
+                        onChange={(e) => updatePessoa(index, "contato", formatTelefone(e.target.value))}
                         className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       />
                     </div>
