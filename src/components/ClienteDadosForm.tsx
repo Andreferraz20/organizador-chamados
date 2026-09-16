@@ -341,9 +341,11 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                           onChange={(e) => updateTipoMaquina(index, e.target.value)}
                           className="w-full bg-transparent text-sm text-slate-800 focus:outline-none dark:text-slate-100"
                         >
-                          <option value="">Tipo de máquina</option>
+                          <option value="" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
+                            Tipo de máquina
+                          </option>
                           {TIPOS_MAQUINA.map((tipo) => (
-                            <option key={tipo} value={tipo}>
+                            <option key={tipo} value={tipo} className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
                               {tipo}
                             </option>
                           ))}

@@ -467,9 +467,11 @@ function AdicionarClienteModal({
                       onChange={(e) => updateTipoMaquina(index, e.target.value)}
                       className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                     >
-                      <option value="">Tipo de máquina</option>
+                      <option value="" className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
+                        Tipo de máquina
+                      </option>
                       {TIPOS_MAQUINA.map((tipo) => (
-                        <option key={tipo} value={tipo}>
+                        <option key={tipo} value={tipo} className="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100">
                           {tipo}
                         </option>
                       ))}

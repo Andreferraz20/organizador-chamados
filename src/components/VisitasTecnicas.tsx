@@ -83,7 +83,7 @@ export function VisitasTecnicas({ empresa, tiposDeVisita, onOpenVisita, initialM
               className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               {tiposDeVisita.map((t) => (
-                <option key={t} value={t}>
+                <option key={t} value={t} className="bg-white text-slate-800 dark:bg-slate-800 dark:text-slate-100">
                   {t}
                 </option>
               ))}
