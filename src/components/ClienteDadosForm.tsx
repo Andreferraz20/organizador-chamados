@@ -375,33 +375,30 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
           ) : (
             <div className="space-y-2">
               {form.pessoas.map((pessoa, index) => (
-                <div key={index} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="flex items-center justify-between bg-blue-50 px-3 py-2 dark:bg-blue-950/40">
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      <input
-                        value={pessoa.nome}
-                        onChange={(e) => updatePessoa(index, "nome", e.target.value)}
-                        placeholder="Nome"
-                        className="min-w-0 flex-[2] bg-transparent text-sm font-semibold text-blue-800 placeholder:text-blue-400 focus:outline-none dark:text-blue-200 dark:placeholder:text-blue-400/60"
-                      />
-                      <span className="text-blue-300 dark:text-blue-600">·</span>
-                      <input
-                        value={pessoa.cargo}
-                        onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
-                        placeholder="Cargo"
-                        className="min-w-0 flex-1 bg-transparent text-xs text-blue-700 placeholder:text-blue-400 focus:outline-none dark:text-blue-300 dark:placeholder:text-blue-400/60"
-                      />
-                    </div>
-                    <button
-                      onClick={() => removePessoa(index)}
-                      title="Remover pessoa"
-                      className="ml-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 hover:text-red-600 dark:text-blue-500 dark:hover:bg-blue-900/40 dark:hover:text-red-400"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
-                        <path d="M18 6 6 18M6 6l12 12" />
-                      </svg>
-                    </button>
+                <div key={index} className="relative overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="grid grid-cols-2 gap-2 bg-blue-50 px-3 py-2.5 pr-9 dark:bg-blue-950">
+                    <input
+                      value={pessoa.nome}
+                      onChange={(e) => updatePessoa(index, "nome", e.target.value)}
+                      placeholder="Nome"
+                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-blue-800 dark:bg-blue-900/60 dark:text-blue-100 dark:placeholder:text-blue-400/60"
+                    />
+                    <input
+                      value={pessoa.cargo}
+                      onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
+                      placeholder="Cargo"
+                      className="min-w-0 rounded-md border border-blue-200 bg-white px-2 py-1 text-sm font-semibold text-blue-900 placeholder:text-blue-400 focus:border-blue-400 focus:outline-none dark:border-blue-800 dark:bg-blue-900/60 dark:text-blue-100 dark:placeholder:text-blue-400/60"
+                    />
                   </div>
+                  <button
+                    onClick={() => removePessoa(index)}
+                    title="Remover pessoa"
+                    className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 hover:text-red-600 dark:text-blue-500 dark:hover:bg-blue-900/40 dark:hover:text-red-400"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </button>
                   <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 dark:bg-slate-800">
                     <div>
                       <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
