@@ -85,7 +85,7 @@ export default function App() {
     <div className="h-screen overflow-y-auto bg-slate-50 dark:bg-slate-950">
       {route.name === "menu" && <ThemeToggle theme={theme} onToggle={toggle} />}
 
-      {route.name !== "menu" && route.name !== "visita" && (
+      {route.name !== "menu" && route.name !== "visita" && route.name !== "cliente" && (
         <BackToMenuButton onClick={() => setRoute({ name: "menu" })} />
       )}
 
@@ -140,6 +140,7 @@ export default function App() {
             })
           }
           onRenamed={(newEmpresa) => setRoute({ name: "cliente", empresa: newEmpresa })}
+          onGoHome={() => setRoute({ name: "menu" })}
         />
       )}
 

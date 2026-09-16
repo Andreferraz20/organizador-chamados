@@ -225,15 +225,17 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
       <div className="grid grid-cols-2 divide-x divide-slate-200 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
         <div className="space-y-6 p-4">
           <div>
-            <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+            <label className="mb-2 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
               Quantidade de Bocas
             </label>
-            <div className="flex h-9 w-12 items-center justify-center rounded-md border border-slate-200 bg-slate-100 text-sm font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200">
-              {quantidadeBocas}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-100 text-base font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                {quantidadeBocas}
+              </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Calculado a partir do tipo e da quantidade de máquinas.
+              </p>
             </div>
-            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-              Calculado a partir dos números de série.
-            </p>
           </div>
 
           <div>
@@ -252,7 +254,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
             {form.numerosSerie.length === 0 ? (
               <EmptyHint text="Nenhum número de série adicionado." />
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {form.numerosSerie.map((ns, index) => (
                   <div
                     key={index}
@@ -266,10 +268,10 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                       setDragIndex(null);
                       setDragOverIndex(null);
                     }}
-                    className={`flex items-center gap-2 rounded-md p-1 transition-colors ${
+                    className={`flex items-stretch gap-2 rounded-lg border p-2.5 transition-colors ${
                       dragOverIndex === index && dragIndex !== null && dragIndex !== index
-                        ? "bg-blue-50 dark:bg-blue-950/30"
-                        : ""
+                        ? "border-blue-300 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30"
+                        : "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
                     }`}
                   >
                     <div
@@ -283,7 +285,7 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                         setDragOverIndex(null);
                       }}
                       title="Arraste para reordenar"
-                      className="flex h-9 w-5 shrink-0 cursor-grab items-center justify-center text-slate-300 hover:text-slate-500 active:cursor-grabbing dark:text-slate-600 dark:hover:text-slate-400"
+                      className="flex w-5 shrink-0 cursor-grab items-center justify-center text-slate-300 hover:text-slate-500 active:cursor-grabbing dark:text-slate-600 dark:hover:text-slate-400"
                     >
                       <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
                         <circle cx="9" cy="6" r="1.4" />
@@ -294,36 +296,55 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
                         <circle cx="15" cy="18" r="1.4" />
                       </svg>
                     </div>
-                    <input
-                      value={ns.numeracao}
-                      onChange={(e) => updateNumeroSerie(index, "numeracao", e.target.value.toUpperCase())}
-                      maxLength={5}
-                      title="Numeração da máquina na lavanderia"
-                      placeholder="Nº"
-                      className="w-16 shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-center text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
-                    />
-                    <input
-                      value={ns.numero}
-                      onChange={(e) => updateNumeroSerie(index, "numero", e.target.value)}
-                      placeholder="Número de série"
-                      className="min-w-0 flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
-                    />
-                    <select
-                      value={ns.tipoMaquina}
-                      onChange={(e) => updateTipoMaquina(index, e.target.value)}
-                      className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                    >
-                      <option value="">Tipo de máquina</option>
-                      {TIPOS_MAQUINA.map((tipo) => (
-                        <option key={tipo} value={tipo}>
-                          {tipo}
-                        </option>
-                      ))}
-                    </select>
+
+                    <div className="grid flex-1 grid-cols-[100px_1fr_160px]">
+                      <div className="pr-4">
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                          Numeração
+                        </label>
+                        <input
+                          value={ns.numeracao}
+                          onChange={(e) => updateNumeroSerie(index, "numeracao", e.target.value.toUpperCase())}
+                          maxLength={5}
+                          title="Numeração da máquina na lavanderia"
+                          placeholder="Nº"
+                          className="w-full bg-transparent text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+                        />
+                      </div>
+                      <div className="border-l border-slate-200 px-4 dark:border-slate-700">
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                          Série
+                        </label>
+                        <input
+                          value={ns.numero}
+                          onChange={(e) => updateNumeroSerie(index, "numero", e.target.value)}
+                          placeholder="Número de série"
+                          className="w-full bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+                        />
+                      </div>
+                      <div className="border-l border-slate-200 pl-4 dark:border-slate-700">
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                          Tipo
+                        </label>
+                        <select
+                          value={ns.tipoMaquina}
+                          onChange={(e) => updateTipoMaquina(index, e.target.value)}
+                          className="w-full bg-transparent text-sm text-slate-800 focus:outline-none dark:text-slate-100"
+                        >
+                          <option value="">Tipo de máquina</option>
+                          {TIPOS_MAQUINA.map((tipo) => (
+                            <option key={tipo} value={tipo}>
+                              {tipo}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
                     <button
                       onClick={() => removeNumeroSerie(index)}
                       title="Remover"
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                      className="flex w-8 shrink-0 items-center justify-center text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
                         <path d="M18 6 6 18M6 6l12 12" />
@@ -354,62 +375,56 @@ export function ClienteDadosForm({ empresa, onRenamed }: Props) {
           ) : (
             <div className="space-y-2">
               {form.pessoas.map((pessoa, index) => (
-                <div
-                  key={index}
-                  className="relative rounded-lg border border-slate-200 bg-slate-50 p-3 pr-10 dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                        Nome
-                      </label>
+                <div key={index} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between bg-blue-50 px-3 py-2 dark:bg-blue-950/40">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
                       <input
                         value={pessoa.nome}
                         onChange={(e) => updatePessoa(index, "nome", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Nome"
+                        className="min-w-0 flex-[2] bg-transparent text-sm font-semibold text-blue-800 placeholder:text-blue-400 focus:outline-none dark:text-blue-200 dark:placeholder:text-blue-400/60"
+                      />
+                      <span className="text-blue-300 dark:text-blue-600">·</span>
+                      <input
+                        value={pessoa.cargo}
+                        onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
+                        placeholder="Cargo"
+                        className="min-w-0 flex-1 bg-transparent text-xs text-blue-700 placeholder:text-blue-400 focus:outline-none dark:text-blue-300 dark:placeholder:text-blue-400/60"
                       />
                     </div>
+                    <button
+                      onClick={() => removePessoa(index)}
+                      title="Remover pessoa"
+                      className="ml-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-blue-400 hover:bg-blue-100 hover:text-red-600 dark:text-blue-500 dark:hover:bg-blue-900/40 dark:hover:text-red-400"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+                        <path d="M18 6 6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 dark:bg-slate-800">
                     <div>
-                      <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                         Contato
                       </label>
                       <input
                         value={pessoa.contato}
                         onChange={(e) => updatePessoa(index, "contato", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
-                        Cargo
-                      </label>
-                      <input
-                        value={pessoa.cargo}
-                        onChange={(e) => updatePessoa(index, "cargo", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                      <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                         E-mail
                       </label>
                       <input
                         type="email"
                         value={pessoa.email}
                         onChange={(e) => updatePessoa(index, "email", e.target.value)}
-                        className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       />
                     </div>
                   </div>
-                  <button
-                    onClick={() => removePessoa(index)}
-                    title="Remover pessoa"
-                    className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-600 dark:text-slate-500 dark:hover:bg-red-950/40 dark:hover:text-red-400"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
-                      <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
-                  </button>
                 </div>
               ))}
             </div>
